@@ -3,7 +3,7 @@
 
 <h3>LoginPage</h3>
 
-<RadzenTemplateForm Data="loginModel" Submit="@(()={Submit();})">
+<EditForm Model="loginModel" OnValidSubmit="Submit">
 
 	<div class="form-group ">
 		<label for="username">Username</label>
@@ -18,12 +18,8 @@
 
 	</div>
 	<button type="submit"> Submit</button>
-	
 
-
-
-
-</RadzenTemplateForm>
+</EditForm>
 
 
 
