@@ -1,0 +1,44 @@
+﻿@page "/Account/Login"
+@inject NavigationManager NavMgr
+
+<h3>LoginPage</h3>
+
+<RadzenTemplateForm Data="loginModel" Submit="@(()={Submit();})">
+
+	<div class="form-group ">
+		<label for="username">Username</label>
+		<InputText id="username" @bind-Value=loginModel.Username/>
+	</div>
+	
+	<div class="form-group">
+		<label for="password">
+			Password
+		</label>
+		<InputText id="password" type="password" @bind-Value=loginModel.Password/>
+
+	</div>
+	<button type="submit"> Submit</button>
+	
+
+
+
+
+</RadzenTemplateForm>
+
+
+
+@code {
+	LoginModel loginModel = new LoginModel();
+
+
+
+	void Submit()
+	{
+		if (loginModel.Username.Equals("Mike"))
+		{
+			NavMgr.NavigateTo("/");
+		}
+	}
+
+
+}
