@@ -1,32 +1,32 @@
 ﻿@page "/Account/Login"
 @inject NavigationManager NavMgr
 
-<h3>LoginPage</h3>
 
-<EditForm Model="loginModel" OnValidSubmit="Submit">
+<h3 class="text-center">Please Sign In</h3>
 
-	<div class="form-group ">
-		<label for="username">Username</label>
-		<InputText id="username" @bind-Value=loginModel.Username/>
-	</div>
+<EditForm Model="loginModel" OnValidSubmit="Submit" autocomplete="off">
+	<DataAnnotationsValidator/>
 	
-	<div class="form-group">
-		<label for="password">
-			Password
-		</label>
-		<InputText id="password" type="password" @bind-Value=loginModel.Password/>
+	
+	<div class="row justify-content-center my-5">
+		<div class="col-lg-8">
+			<ValidationSummary />
 
+			<label class="form-label" for="@(()=>loginModel.Username)">Username</label>
+			<InputText class="form-control mb-4" @bind-Value="@loginModel.Username" />
+
+			<label class="form-label" for="@(()=>loginModel.Password)">Password</label>
+			<InputText class="form-control mb-4" id="password" type="password" @bind-Value="@loginModel.Password"/>
+
+			<button type="submit" class="btn btn-primary"> Submit</button>
+		</div>
 	</div>
-	<button type="submit"> Submit</button>
-
 </EditForm>
 
 
 
 @code {
 	LoginModel loginModel = new LoginModel();
-
-
 
 	void Submit()
 	{
@@ -35,6 +35,4 @@
 			NavMgr.NavigateTo("/");
 		}
 	}
-
-
 }
