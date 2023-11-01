@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace RadzenUI.Pages.Auth
 {
-    public class LoginModel
+    public class LoginRequest
     {
         [Required, StringLength(50)]
         public string Username { get; set; }

@@ -24,6 +24,7 @@ public class Program
             });
         builder.Services.AddSingleton<WeatherForecastService>();
         builder.Services.AddRadzenComponents();
+        builder.Services.AddScoped<IDataProvider, SqliteDataProvider>();
 
         var app = builder.Build();
 

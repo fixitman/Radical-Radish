@@ -26,13 +26,13 @@
 
 
 @code {
-	LoginModel loginModel = new LoginModel();
+	LoginRequest loginModel = new LoginRequest();
 
 	void Submit()
 	{
 		if (loginModel.Username.Equals("Mike"))
 		{
-			NavMgr.NavigateTo("/");
+			NavMgr.NavigateTo("/schedule");
 		}
 	}
 }

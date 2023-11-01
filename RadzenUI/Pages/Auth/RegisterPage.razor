@@ -1,0 +1,38 @@
+﻿@page "/Account/Register"
+<h3>RegisterPage</h3>
+
+
+<EditForm Model="model" OnValidSubmit="Submit" autocomplete="off">
+	<DataAnnotationsValidator />
+
+
+	<div class="row justify-content-center my-5">
+		<div class="col-lg-8">
+			<ValidationSummary />
+
+			<label class="form-label" for="@(()=>model.Username)">Username</label>
+			<InputText class="form-control mb-4" @bind-Value="@model.Username" />
+			
+			<label class="form-label" for="@(()=>model.Email)">Email</label>
+			<InputText typeof="email" class="form-control mb-4" @bind-Value="@model.Email" />
+
+			<label class="form-label" for="@(()=>model.Password)">Password</label>
+			<InputText class="form-control mb-4" id="password" type="password" @bind-Value="@model.Password" />
+
+			<label class="form-label" for="@(()=>model.Verify)">Verify</label>
+			<InputText class="form-control mb-4" id="password" type="password" @bind-Value="@model.Verify" />
+			
+
+			<button type="submit" class="btn btn-primary"> Submit</button>
+		</div>
+	</div>
+</EditForm>
+
+@code {
+	RegisterRequest model = new();
+
+	void Submit()
+	{
+		
+	}
+}
