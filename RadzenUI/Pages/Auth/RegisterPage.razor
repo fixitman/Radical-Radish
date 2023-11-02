@@ -1,4 +1,7 @@
 ﻿@page "/Account/Register"
+@inject IDataProvider data
+@inject NavigationManager NavMgr
+@inject DialogService DialogService
 <h3>RegisterPage</h3>
 
 
@@ -17,22 +20,64 @@
 			<InputText typeof="email" class="form-control mb-4" @bind-Value="@model.Email" />
 
 			<label class="form-label" for="@(()=>model.Password)">Password</label>
-			<InputText class="form-control mb-4" id="password" type="password" @bind-Value="@model.Password" />
+			<InputText class="form-control mb-4" type="password" @bind-Value="@model.Password" />
 
 			<label class="form-label" for="@(()=>model.Verify)">Verify</label>
-			<InputText class="form-control mb-4" id="password" type="password" @bind-Value="@model.Verify" />
+			<InputText class="form-control mb-4" type="password" @bind-Value="@model.Verify" />
 			
 
 			<button type="submit" class="btn btn-primary"> Submit</button>
 		</div>
 	</div>
+
+	@if (DisplayAlert)
+	{
+		<div class="alert alert-success fade-in" role="alert">
+			@AlertMessage
+		</div>
+	}
 </EditForm>
 
 @code {
 	RegisterRequest model = new();
 
-	void Submit()
+	bool DisplayAlert = false;
+	string AlertMessage = "";
+
+	async void Submit()
 	{
-		
+		User u = data.GetUser(model.Username);
+		if(u != null)
+		{
+			//display user exists message
+			string msg = $"User {model.Username} already exists.";
+			await DialogService.Alert(msg, "Error");
+			return;
+		}
+
+		var toAdd = new User
+			{
+				Id = Guid.NewGuid().ToString(),
+				Username = model.Username,
+				Email = model.Email,
+				PWHash = BCrypt.Net.BCrypt.HashPassword(model.Password)
+			};
+		var added = data.AddUser(toAdd);
+		if(added == null)
+		{
+			//something went wrong. display a message.
+			await DialogService.Alert("Error adding user to database.", "Error");
+		}
+		else
+		{			
+			await DialogService.Alert("User Added.", "Success");
+
+			AlertMessage = "Success!";
+			DisplayAlert = true;
+			StateHasChanged();
+
+			//clear form
+			model = new();
+		}
 	}
 }

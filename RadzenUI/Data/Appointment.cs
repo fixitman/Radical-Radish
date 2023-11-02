@@ -6,5 +6,6 @@ public class Appointment
     public DateTime Start { get; set; }
     public DateTime End { get; set; }
     public string Text { get; set; }
-    public bool IsAllDay { get; set; } = false;   
+    public bool IsAllDay { get; set; } = false;
+    public string Color { get; set; } = "Green";
 }

@@ -14,39 +14,22 @@ public class SqliteDataProvider : IDataProvider
 		_configuration = configuration;
 	}
 
-	public RegisterResponse? RegisterUser(RegisterRequest req)
+	public User? AddUser(User user)
 	{
-		if(req.Password != req.Verify)
-		{
-			return null;
-		}
-		
-		string sql = "select count(*) from users where Username = @Username;";
+		var sql = "insert into Users (Id, Username, PWHash, Email) values (@Id, @Username, @PWHash, @Email) Returning *;";
 		using SqliteConnection conn = new SqliteConnection(_configuration.GetConnectionString("Default"));
 		conn.Open();
-		var c = conn.ExecuteScalar<int>(sql, new { Username = req.Username });
-		if(c > 0)
-		{
-			conn.Close();
-			return null;
-		}
+		var inserted = conn.QuerySingle <User>(sql, new {Id = user.Id,Username = user.Username,PWHash = user.PWHash, Email = user.Email });
+		return inserted;
+	}
 
-		sql = "insert into Users (Id, Username, Password, Email) values (@Id, @Username, @Password, @Email);";
-		User newUser = new User()
-		{
-			Id = new Guid(),
-			Email = req.Email,
-			Username = req.Username,
-			PWHash = BCrypt.Net.BCrypt.HashPassword(req.Password)
-
-		};
-		c = conn.ExecuteScalar<int>(sql, newUser);
-		conn.Close();
-		if(c < 1)
-		{
-			return null;
-		}
-		return new RegisterResponse { Id = newUser.Id, Username = newUser.Username };
+	public User? GetUser(string username)
+	{
+		var sql = "select * from Users where Username = @Username;";
+		using SqliteConnection conn = new SqliteConnection(_configuration.GetConnectionString("Default"));
+		conn.Open();
+		var u = conn.QuerySingleOrDefault<User>(sql, new { Username = username});
+		return u;
 	}
 
 	public LoginResponse? ValidateUser(LoginRequest req)

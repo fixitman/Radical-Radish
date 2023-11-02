@@ -1,12 +1,20 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 
 namespace RadzenUI.Pages.Auth;
 
 public class RegisterRequest
 {
-    [Required]   public  string Username { get; set; }
-    [Required]   public  string Email { get; set; }
-    [Required]   public string Password { get; set; }
-    [Required]   public string Verify { get; set; }
+    [Required, MaxLength(50)]   
+    public  string Username { get; set; }
+    
+    [Required, EmailAddress]   
+    public  string Email { get; set; }
+    
+    [Required, PasswordPropertyText, MaxLength(50)]   
+    public string Password { get; set; }
+    
+    [Required, Compare(nameof(Password)), MaxLength(50)]   
+    public string Verify { get; set; }
 
 }

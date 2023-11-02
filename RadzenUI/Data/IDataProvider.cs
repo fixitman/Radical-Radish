@@ -6,7 +6,9 @@ namespace RadzenUI.Data
 	{
 		public LoginResponse? ValidateUser(LoginRequest req);
 
-		public RegisterResponse? RegisterUser(RegisterRequest req);
+		public User? AddUser(User user);
+
+		public User GetUser(string username);
 
 	}
 }

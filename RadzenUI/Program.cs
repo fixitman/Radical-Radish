@@ -17,14 +17,10 @@ public class Program
         // Add services to the container.
         builder.Services.AddRazorPages();
         builder.Services.AddServerSideBlazor();
-        builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-            .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme,
-            opt => { 
-                
-            });
+        
         builder.Services.AddSingleton<WeatherForecastService>();
-        builder.Services.AddRadzenComponents();
         builder.Services.AddScoped<IDataProvider, SqliteDataProvider>();
+        builder.Services.AddRadzenComponents();
 
         var app = builder.Build();
 
@@ -37,8 +33,6 @@ public class Program
         }
 
         app.UseHttpsRedirection();
-
-        app.UseAuthentication();
 
         app.UseStaticFiles();
 

@@ -1,4 +1,5 @@
 ﻿@page "/"
+@inject DialogService dialog
 
 <PageTitle>Index</PageTitle>
 
@@ -8,12 +9,16 @@ Welcome to your new app.
 
 <SurveyPrompt Title="How is Blazor working for you?" />
 
-<Radzen.Blazor.RadzenButton Text="@text"></Radzen.Blazor.RadzenButton>
+<Radzen.Blazor.RadzenButton Text="@text" Click="@Click"></Radzen.Blazor.RadzenButton>
 
 @code{
     string text = "click me";
-   
 
-    
+    async void Click()
+    {
+        bool? result =  await dialog.Confirm("The Message", "The Title");
+        
+    }
+
 
 }
