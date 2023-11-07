@@ -1,43 +1,44 @@
 ﻿@page "/Account/Register"
+@using RadzenUI.Pages.Auth.Models;
 @inject IDataProvider data
 @inject NavigationManager NavMgr
 @inject DialogService DialogService
+@inject ILogger<RegisterPage> Logger
 
 
-
-<EditForm Model="model" OnValidSubmit="Submit" autocomplete="off">
-	<DataAnnotationsValidator />
 
 
 	<div class="row justify-content-center my-5">
-			<div class="col-lg-8">
-		<div class="card ">
-			<div class="card-body">
+		<div class="col-lg-8">
+			<div class="card ">
+				<EditForm Model="model" OnValidSubmit="Submit" autocomplete="off">
+					<ValidationSummary />
 
-				<ValidationSummary />
-					<h3 class="card-title mb-4">Register</h3>
+					<DataAnnotationsValidator />
+					<div class="card-body">
 
-				<label class="form-label" for="@(()=>model.Username)">Username</label>
-				<InputText class="form-control mb-4" @bind-Value="@model.Username" @ref=UsernameInput/>			
+						<h3 class="card-title mb-4">Register</h3>
+
+						<label class="form-label" for="@(()=>model.Username)">Username</label>
+						<InputText class="form-control mb-4" @bind-Value="@model.Username" @ref=UsernameInput/>			
 			
-				<label class="form-label" for="@(()=>model.Email)">Email</label>
-				<InputText typeof="email" class="form-control mb-4" @bind-Value="@model.Email" />
+						<label class="form-label" for="@(()=>model.Email)">Email</label>
+						<InputText typeof="email" class="form-control mb-4" @bind-Value="@model.Email" />
 
-				<label class="form-label" for="@(()=>model.Password)">Password</label>
-				<InputText class="form-control mb-4" type="password" @bind-Value="@model.Password" />
+						<label class="form-label" for="@(()=>model.Password)">Password</label>
+						<InputText class="form-control mb-4" type="password" @bind-Value="@model.Password" />
 
-				<label class="form-label" for="@(()=>model.Verify)">Verify</label>
-				<InputText class="form-control mb-4" type="password" @bind-Value="@model.Verify" />
-			
+						<label class="form-label" for="@(()=>model.Verify)">Verify</label>
+						<InputText class="form-control mb-4" type="password" @bind-Value="@model.Verify" />			
 
-				<button type="submit" class="btn btn-primary"> Submit</button>
+						<button type="submit" class="btn btn-primary"> Submit</button>
+					</div>
+				</EditForm>
 			</div>
-		</div>
 		</div>
 	</div>
 
 	
-</EditForm>
 
 @code {
 	RegisterRequest model = new();
@@ -52,6 +53,7 @@
 			//display user exists message
 			string msg = $"User {model.Username} already exists.";
 			await DialogService.Alert(msg, "Error");
+			Logger.LogInformation($"User {model.Username} already exists.");
 			return;
 		}
 

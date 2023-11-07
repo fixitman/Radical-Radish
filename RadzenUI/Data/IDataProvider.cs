@@ -1,4 +1,4 @@
-﻿using RadzenUI.Pages.Auth;
+﻿using RadzenUI.Pages.Auth.Models;
 
 namespace RadzenUI.Data
 {

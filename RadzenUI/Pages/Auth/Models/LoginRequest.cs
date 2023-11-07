@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
-namespace RadzenUI.Pages.Auth
+namespace RadzenUI.Pages.Auth.Models
 {
     public class LoginRequest
     {
