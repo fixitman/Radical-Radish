@@ -10,14 +10,14 @@
 
 	<div class="row justify-content-center my-5">
 		<div class="col-lg-8">
-			<div class="card ">
+			
 				<EditForm Model="model" OnValidSubmit="Submit" autocomplete="off">
 					<ValidationSummary />
 
 					<DataAnnotationsValidator />
-					<div class="card-body">
+				
 
-						<h3 class="card-title mb-4">Register</h3>
+						<h2 class="card-title mb-4">Register</h2>
 
 						<label class="form-label" for="@(()=>model.Username)">Username</label>
 						<InputText class="form-control mb-4" @bind-Value="@model.Username" @ref=UsernameInput/>			
@@ -31,10 +31,10 @@
 						<label class="form-label" for="@(()=>model.Verify)">Verify</label>
 						<InputText class="form-control mb-4" type="password" @bind-Value="@model.Verify" />			
 
-						<button type="submit" class="btn btn-primary"> Submit</button>
-					</div>
+						<button type="submit" class="btn btn-success"> Submit</button>
+					
 				</EditForm>
-			</div>
+			
 		</div>
 	</div>
 
