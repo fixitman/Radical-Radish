@@ -4,11 +4,11 @@ namespace RadzenUI.Data
 {
     public interface IDataProvider
 	{
-		public LoginResponse? ValidateUser(LoginRequest req);
+		public Result<LoginResponse> ValidateUser(LoginRequest req);
 
-		public User? AddUser(User user);
+		public Result<User> AddUser(User user);
 
-		public User GetUser(string username);
+		public Result<User> GetUser(string username);
 
 	}
 }

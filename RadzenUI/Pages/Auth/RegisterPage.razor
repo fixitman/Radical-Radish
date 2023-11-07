@@ -2,7 +2,7 @@
 @inject IDataProvider data
 @inject NavigationManager NavMgr
 @inject DialogService DialogService
-<h3>RegisterPage</h3>
+
 
 
 <EditForm Model="model" OnValidSubmit="Submit" autocomplete="off">
@@ -10,44 +10,44 @@
 
 
 	<div class="row justify-content-center my-5">
-		<div class="col-lg-8">
-			<ValidationSummary />
+			<div class="col-lg-8">
+		<div class="card ">
+			<div class="card-body">
 
-			<label class="form-label" for="@(()=>model.Username)">Username</label>
-			<InputText class="form-control mb-4" @bind-Value="@model.Username" />
+				<ValidationSummary />
+					<h3 class="card-title mb-4">Register</h3>
+
+				<label class="form-label" for="@(()=>model.Username)">Username</label>
+				<InputText class="form-control mb-4" @bind-Value="@model.Username" @ref=UsernameInput/>			
 			
-			<label class="form-label" for="@(()=>model.Email)">Email</label>
-			<InputText typeof="email" class="form-control mb-4" @bind-Value="@model.Email" />
+				<label class="form-label" for="@(()=>model.Email)">Email</label>
+				<InputText typeof="email" class="form-control mb-4" @bind-Value="@model.Email" />
 
-			<label class="form-label" for="@(()=>model.Password)">Password</label>
-			<InputText class="form-control mb-4" type="password" @bind-Value="@model.Password" />
+				<label class="form-label" for="@(()=>model.Password)">Password</label>
+				<InputText class="form-control mb-4" type="password" @bind-Value="@model.Password" />
 
-			<label class="form-label" for="@(()=>model.Verify)">Verify</label>
-			<InputText class="form-control mb-4" type="password" @bind-Value="@model.Verify" />
+				<label class="form-label" for="@(()=>model.Verify)">Verify</label>
+				<InputText class="form-control mb-4" type="password" @bind-Value="@model.Verify" />
 			
 
-			<button type="submit" class="btn btn-primary"> Submit</button>
+				<button type="submit" class="btn btn-primary"> Submit</button>
+			</div>
+		</div>
 		</div>
 	</div>
 
-	@if (DisplayAlert)
-	{
-		<div class="alert alert-success fade-in" role="alert">
-			@AlertMessage
-		</div>
-	}
+	
 </EditForm>
 
 @code {
 	RegisterRequest model = new();
-
-	bool DisplayAlert = false;
-	string AlertMessage = "";
+	InputText UsernameInput = default!;
 
 	async void Submit()
 	{
-		User u = data.GetUser(model.Username);
-		if(u != null)
+		// Check if user exists
+		Result<User> u = data.GetUser(model.Username);
+		if(u.Success)
 		{
 			//display user exists message
 			string msg = $"User {model.Username} already exists.";
@@ -55,29 +55,37 @@
 			return;
 		}
 
-		var toAdd = new User
+		User newUser = new ()
 			{
 				Id = Guid.NewGuid().ToString(),
 				Username = model.Username,
 				Email = model.Email,
 				PWHash = BCrypt.Net.BCrypt.HashPassword(model.Password)
 			};
-		var added = data.AddUser(toAdd);
-		if(added == null)
+
+		Result<User> added = data.AddUser(newUser);
+		if(added.IsFailureOrEmpty)
 		{
 			//something went wrong. display a message.
 			await DialogService.Alert("Error adding user to database.", "Error");
 		}
 		else
 		{			
-			await DialogService.Alert("User Added.", "Success");
-
-			AlertMessage = "Success!";
-			DisplayAlert = true;
-			StateHasChanged();
+			await DialogService.Alert("User Added.", "Success");					
 
 			//clear form
-			model = new();
+			model = new RegisterRequest();
+			StateHasChanged();
+			
 		}
+	}
+
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+			if ( firstRender && UsernameInput.Element != null)
+			{				
+				await UsernameInput.Element.Value.FocusAsync();
+			}
+		
 	}
 }
