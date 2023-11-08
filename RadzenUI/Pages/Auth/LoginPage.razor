@@ -54,9 +54,13 @@
 		// update app state
 		AppState.User = new() { Id = r.Value.Id, Email = r.Value.Email, Username = r.Value.Email };
 
-		// go to calendars page
-		NavMgr.NavigateTo("/calendar");
-
+		string goTo = "/schedule";
+		if (!string.IsNullOrEmpty(AppState.ReturnTo))
+		{
+			goTo = AppState.ReturnTo;
+			AppState.ReturnTo = string.Empty;
+			NavMgr.NavigateTo(goTo);
+		}
 
 	}
 }

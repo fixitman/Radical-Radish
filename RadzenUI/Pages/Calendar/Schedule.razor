@@ -5,9 +5,18 @@
 
 @inject DialogService DialogService
 
-<RadzenScheduler @ref=@scheduler SlotRender=@OnSlotRender style="height: 768px;" TItem="Appointment" Data=@appointments StartProperty="Start" EndProperty="End"
-    TextProperty="Text" SelectedIndex="2"
-    SlotSelect=@OnSlotSelect AppointmentSelect=@OnAppointmentSelect AppointmentRender=@OnAppointmentRender>
+<LoginRequired />
+
+<RadzenScheduler @ref=@scheduler style="height: 768px;" SelectedIndex="2"
+    Data=@appointments 
+    TItem="Appointment" 
+    StartProperty="Start" 
+    EndProperty="End"
+    TextProperty="Text" 
+    SlotSelect=@OnSlotSelect 
+    AppointmentSelect=@OnAppointmentSelect 
+    SlotRender=@OnSlotRender 
+    AppointmentRender=@OnAppointmentRender >
     <RadzenDayView />
     <RadzenWeekView />
     <RadzenMonthView />
@@ -24,7 +33,7 @@
     IList<Appointment> appointments = new List<Appointment>
     {
         new Appointment { Start = DateTime.Today.AddDays(-2), End = DateTime.Today.AddDays(-2), Text = "Birthday" },
-        new Appointment { Start = DateTime.Today.AddDays(-11), End = DateTime.Today.AddDays(-10), Text = "Day off" , Color = "Green"},
+        new Appointment { Start = DateTime.Today.AddDays(-11), End = DateTime.Today.AddDays(-10), Text = "Day off" , Color = "orange"},
         new Appointment { Start = DateTime.Today.AddDays(-10), End = DateTime.Today.AddDays(-8), Text = "Work from home" },
         new Appointment { Start = DateTime.Today.AddHours(10), End = DateTime.Today.AddHours(12), Text = "Online meeting" },
         new Appointment { Start = DateTime.Today.AddHours(10), End = DateTime.Today.AddHours(13), Text = "Skype call" },
