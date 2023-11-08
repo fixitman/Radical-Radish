@@ -1,7 +1,12 @@
-﻿namespace RadzenUI.Data;
+﻿using RadzenUI.Pages.Auth.Models;
+
+
+
+namespace RadzenUI.Data;
 
 public class AppState
 {
-    public User? User { get; set; }
-    public string? CurrentCalendar { get; set; }
+    public AppUser? User { get; set; }
+   
 }
+

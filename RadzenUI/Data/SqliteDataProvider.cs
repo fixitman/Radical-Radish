@@ -48,24 +48,6 @@ public class SqliteDataProvider : IDataProvider
 		}
 	}
 
-	public Result<LoginResponse> ValidateUser(LoginRequest req)
-	{
-		try
-		{
-			string sql = "select @ from Users where Username = @Username and Password = @Password LIMIT 1";
-			using SqliteConnection conn = new SqliteConnection(_configuration.GetConnectionString("Default"));
-			conn.Open();
-			User? user = conn.QueryFirstOrDefault<User>(sql,req);
-			conn.Close();
-			return user is null ? Result.Empty<LoginResponse>() 
-				:Result.Ok( new LoginResponse { Id = user.Id, Username = user.Username });
-		}
-		catch (Exception e)
-		{			
-			return Result.Fail<LoginResponse>(e.Message);			
-		}	
-		
-
-	}
+	
 	
 }

@@ -1,23 +1,26 @@
 ﻿@page "/Account/Login"
 @using RadzenUI.Pages.Auth.Models;
+@using BCrypt.Net;
 @inject NavigationManager NavMgr
+@inject IDataProvider data
+@inject DialogService dialog
+@inject AppState AppState
 
 
 <h3 class="text-center">Please Sign In</h3>
 
-<EditForm Model="loginModel" OnValidSubmit="Submit" autocomplete="off">
-	<DataAnnotationsValidator/>
-	
+<EditForm Model="request" OnValidSubmit="Submit" autocomplete="off">
+	<DataAnnotationsValidator/>	
 	
 	<div class="row justify-content-center my-5">
 		<div class="col-lg-8">
 			<ValidationSummary />
 
-			<label class="form-label" for="@(()=>loginModel.Username)">Username</label>
-			<InputText class="form-control mb-4" @bind-Value="@loginModel.Username" />
+			<label class="form-label" for="@(()=>request.Username)">Username</label>
+			<InputText class="form-control mb-4" @bind-Value="@request.Username" />
 
-			<label class="form-label" for="@(()=>loginModel.Password)">Password</label>
-			<InputText class="form-control mb-4" id="password" type="password" @bind-Value="@loginModel.Password"/>
+			<label class="form-label" for="@(()=>request.Password)">Password</label>
+			<InputText class="form-control mb-4" id="password" type="password" @bind-Value="@request.Password"/>
 
 			<button type="submit" class="btn btn-primary"> Submit</button>
 		</div>
@@ -27,13 +30,33 @@
 
 
 @code {
-	LoginRequest loginModel = new LoginRequest();
+	LoginRequest request = new LoginRequest();
 
-	void Submit()
+	async void Submit()
 	{
-		if (loginModel.Username.Equals("Mike"))
+		// get User
+
+		Result<User> r = data.GetUser(request.Username);
+		if (r.IsFailure) // database or network problems
 		{
-			NavMgr.NavigateTo("/schedule");
+			await dialog.Alert(r.Error, "Error");
+			request = new();
+			StateHasChanged();
+			return;
 		}
+
+		if( r.IsEmpty || !BCrypt.Verify(request.Password,r.Value.PWHash)) //invalid credentials
+		{
+			await dialog.Alert("Invalid Username or Password", "Error");
+			return;
+		}
+
+		// update app state
+		AppState.User = new() { Id = r.Value.Id, Email = r.Value.Email, Username = r.Value.Email };
+
+		// go to calendars page
+		NavMgr.NavigateTo("/calendar");
+
+
 	}
 }

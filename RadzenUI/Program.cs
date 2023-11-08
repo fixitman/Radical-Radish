@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Radzen;
 using RadzenUI.Data;
 using System.ComponentModel;
@@ -20,6 +19,7 @@ public class Program
         
         builder.Services.AddSingleton<WeatherForecastService>();
         builder.Services.AddScoped<IDataProvider, SqliteDataProvider>();
+        builder.Services.AddScoped<AppState>();
         builder.Services.AddRadzenComponents();
 
         var app = builder.Build();
