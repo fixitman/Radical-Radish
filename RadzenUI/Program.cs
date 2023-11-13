@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Components.Authorization;
 using Radzen;
+using RadzenUI.auth;
 using RadzenUI.Data;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
@@ -19,6 +21,7 @@ public class Program
         
         builder.Services.AddSingleton<WeatherForecastService>();
         builder.Services.AddScoped<IDataProvider, SqliteDataProvider>();
+        builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
         builder.Services.AddScoped<AppState>();
         builder.Services.AddRadzenComponents();
 

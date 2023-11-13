@@ -1,10 +1,12 @@
 ﻿@page "/Account/Login"
 @using RadzenUI.Pages.Auth.Models;
 @using BCrypt.Net;
+@using RadzenUI.auth;
 @inject NavigationManager NavMgr
 @inject IDataProvider data
 @inject DialogService dialog
 @inject AppState AppState
+@inject AuthenticationStateProvider AuthStateProvider
 
 
 <h3 class="text-center">Please Sign In</h3>
@@ -53,6 +55,9 @@
 
 		// update app state
 		AppState.User = new() { Id = r.Value.Id, Email = r.Value.Email, Username = r.Value.Email };
+
+		await ((CustomAuthStateProvider)AuthStateProvider).ChangeUser(r.Value.Id, r.Value.Username, "Admin");
+
 
 		string goTo = "/schedule";
 		if (!string.IsNullOrEmpty(AppState.ReturnTo))
