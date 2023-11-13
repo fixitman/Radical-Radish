@@ -41,7 +41,7 @@
 	{
 		// Get user
 
-		Result<User> r = data.GetUser(request.Username);
+		Result<User> r = data.GetUser(request.Username.ToLower());
 		if (r.IsFailure) // database or network problems
 		{
 			await dialog.Alert(r.Error, "Error");
@@ -59,6 +59,7 @@
 
 		var authState = await ((CustomAuthStateProvider)AuthStateProvider).ChangeUser(r.Value.Id, r.Value.Username, "Admin");
 		var u = authState.User;
+		
 		
 		NavMgr.NavigateTo(ReturnUrl ?? "/");
 	}

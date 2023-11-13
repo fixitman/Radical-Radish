@@ -35,7 +35,7 @@ public class SqliteDataProvider : IDataProvider
 	{
 		try
 		{
-			var sql = "select * from Users where Username = @Username;";
+			var sql = "select * from Users where Lower(Username) = LOWER(@Username);";
 			using SqliteConnection conn = new SqliteConnection(_configuration.GetConnectionString("Default"));
 			conn.Open();
 			var u = conn.QuerySingleOrDefault<User>(sql, new { Username = username});
