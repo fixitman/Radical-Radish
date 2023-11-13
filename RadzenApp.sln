@@ -5,8 +5,6 @@ VisualStudioVersion = 17.7.34202.233
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RadzenUI", "RadzenUI\RadzenUI.csproj", "{EC8E2558-8692-4697-A0BB-B5D672F632D9}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApplication2", "WebApplication2\WebApplication2.csproj", "{A4B797B9-F593-4AB9-9575-D59075CDB95E}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -17,10 +15,6 @@ Global
 		{EC8E2558-8692-4697-A0BB-B5D672F632D9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EC8E2558-8692-4697-A0BB-B5D672F632D9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EC8E2558-8692-4697-A0BB-B5D672F632D9}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A4B797B9-F593-4AB9-9575-D59075CDB95E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A4B797B9-F593-4AB9-9575-D59075CDB95E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A4B797B9-F593-4AB9-9575-D59075CDB95E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A4B797B9-F593-4AB9-9575-D59075CDB95E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

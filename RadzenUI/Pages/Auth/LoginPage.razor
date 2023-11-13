@@ -1,4 +1,4 @@
-﻿@page "/Account/Login"
+﻿@page "/Account/Login/{ReturnUrl?}"
 @using RadzenUI.Pages.Auth.Models;
 @using BCrypt.Net;
 @using RadzenUI.auth;
@@ -32,11 +32,14 @@
 
 
 @code {
+	[Parameter]
+	public string? ReturnUrl { get; set; }
+
 	LoginRequest request = new LoginRequest();
 
 	async void Submit()
 	{
-		// get User
+		// Get user
 
 		Result<User> r = data.GetUser(request.Username);
 		if (r.IsFailure) // database or network problems
@@ -47,25 +50,16 @@
 			return;
 		}
 
-		if( r.IsEmpty || !BCrypt.Verify(request.Password,r.Value.PWHash)) //invalid credentials
+		// Check credentials
+		if( r.IsEmpty || !BCrypt.Verify(request.Password,r.Value.PWHash)) 
 		{
-			await dialog.Alert("Invalid Username or Password", "Error");
+			await dialog.Alert("Incorrect Username or Password", "Error");
 			return;
 		}
 
-		// update app state
-		AppState.User = new() { Id = r.Value.Id, Email = r.Value.Email, Username = r.Value.Email };
-
-		await ((CustomAuthStateProvider)AuthStateProvider).ChangeUser(r.Value.Id, r.Value.Username, "Admin");
-
-
-		string goTo = "/schedule";
-		if (!string.IsNullOrEmpty(AppState.ReturnTo))
-		{
-			goTo = AppState.ReturnTo;
-			AppState.ReturnTo = string.Empty;
-			NavMgr.NavigateTo(goTo);
-		}
-
+		var authState = await ((CustomAuthStateProvider)AuthStateProvider).ChangeUser(r.Value.Id, r.Value.Username, "Admin");
+		var u = authState.User;
+		
+		NavMgr.NavigateTo(ReturnUrl ?? "/");
 	}
 }

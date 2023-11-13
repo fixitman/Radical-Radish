@@ -1,5 +1,7 @@
-﻿@inject AppState AppState
+﻿@using RadzenUI.auth;
+@inject AppState AppState
 @inject NavigationManager NavMgr
+@inject AuthenticationStateProvider AuthStateProvider
 
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
@@ -60,9 +62,10 @@
         collapseNavMenu = !collapseNavMenu;
     }
 
-    private void Logout()
+    private async void Logout()
     {
-        AppState.User = null;
+        var authState = await((CustomAuthStateProvider)AuthStateProvider).Logout();
+        var u = authState.User;
         NavMgr.NavigateTo("/Account/Login");
     }
 }

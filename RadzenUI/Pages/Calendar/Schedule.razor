@@ -1,4 +1,5 @@
 ﻿@page "/schedule"
+@attribute [Authorize]
 @using RadzenUI
 @using RadzenUI.Shared
 @using Radzen
@@ -7,7 +8,10 @@
 
 
 
-<RadzenScheduler @ref=@scheduler style="height: 768px;" SelectedIndex="2"
+<RadzenScheduler 
+    @ref=@scheduler 
+    style="height: 768px;" 
+    SelectedIndex="2"
     Data=@appointments 
     TItem="Appointment" 
     StartProperty="Start" 
