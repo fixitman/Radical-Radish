@@ -48,6 +48,12 @@
 	{
 		// Check if user exists
 		Result<User> u = data.GetUser(model.Username);
+		if(u.IsFailure && !u.IsEmpty) // Something's wrong!
+		{
+			await DialogService.Alert(u.Error, "Error");
+			return;
+		}
+
 		if(u.Success)
 		{
 			//display user exists message
@@ -69,7 +75,7 @@
 		if(added.IsFailureOrEmpty)
 		{
 			//something went wrong. display a message.
-			await DialogService.Alert("Error adding user to database.", "Error");
+			await DialogService.Alert($"{added.Error}.", "Error adding user to database");
 		}
 		else
 		{			
