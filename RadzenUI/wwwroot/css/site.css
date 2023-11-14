@@ -62,3 +62,15 @@ a, .btn-link {
     .blazor-error-boundary::after {
         content: "An error has occurred."
     }
+
+@media print {
+    body {
+        visibility:hidden
+    }
+    #Print-Area {
+        visibility:visible ;
+        position: absolute;
+        top: 0;
+        left: 0;
+    }
+}
