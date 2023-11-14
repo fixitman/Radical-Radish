@@ -1,0 +1,32 @@
+﻿@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
+@using System.Security.Claims;
+@using RadzenUI.auth;
+@inject ProtectedSessionStorage Session
+@inject AuthenticationStateProvider AuthStateProvider
+
+@code {
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var state = await AuthStateProvider.GetAuthenticationStateAsync();
+            var u = state.User;
+            if(!(u.Identity?.IsAuthenticated ?? false))
+            {
+                var r = await Session.GetAsync<AuthUser>("AuthUser");
+                if (r.Success)
+                {
+                    await ((CustomAuthStateProvider)AuthStateProvider).ChangeUser(r.Value.Id, r.Value.UserName, r.Value.Role);
+
+                }
+            }
+        }
+    }
+
+    class AuthUser
+    {
+        public string Id { get; set; }
+        public string UserName { get; set; }
+        public string Role { get; set; }
+    }
+}

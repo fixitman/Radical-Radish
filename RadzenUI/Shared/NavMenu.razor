@@ -1,8 +1,11 @@
-﻿@using RadzenUI.auth;
+﻿@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
+@using RadzenUI.auth;
 @using System.Security.Claims
+@inject ProtectedSessionStorage Session
 @inject AppState AppState
 @inject NavigationManager NavMgr
 @inject AuthenticationStateProvider AuthStateProvider
+
 
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
@@ -46,9 +49,9 @@
             </NavLink>
         </div>
         <div class="nav-item px-3">
-            <button class="nav-link" @onclick="@Logout">
+            <NavLink class="nav-link" @onclick="@Logout">
                 <span class="oi oi-list-rich" aria-hidden="true"></span> Log Out
-            </button>
+            </NavLink>
         </div>
     </nav>
 </div>
@@ -82,7 +85,7 @@
     private async void Logout()
     {
         var authState = await((CustomAuthStateProvider)AuthStateProvider).Logout();
-        var u = authState.User;
+        await Session.DeleteAsync("AuthUser");
         NavMgr.NavigateTo("/Account/Login");
     }
 }
