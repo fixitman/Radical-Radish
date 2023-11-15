@@ -5,7 +5,7 @@ public class Calendar
     
     public string Id { get; set; }
     public string Name { get; set; } = "Default";
-    public string Owner { get; set; }
+    
 
         
 }

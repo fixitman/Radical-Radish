@@ -1,24 +1,23 @@
 ﻿using Dapper;
 using Microsoft.Data.Sqlite;
-using RadzenUI.Pages.Auth.Models;
 
 namespace RadzenUI.Data;
 
 public class SqliteDataProvider : IDataProvider
 {
-	private readonly IConfiguration _configuration;
+	private string connectionString;
 
 	public SqliteDataProvider(IConfiguration configuration)
     {
-		_configuration = configuration;
+		connectionString = configuration.GetConnectionString("Default");
 	}
 
 	public Result<User> AddUser(User user)
 	{
-		var sql = "insert into Users (Id, Username, PWHash, Email) values (@Id, @Username, @PWHash, @Email) Returning *;";
+		using SqliteConnection conn = new SqliteConnection(connectionString);
 		try
 		{
-			using SqliteConnection conn = new SqliteConnection(_configuration.GetConnectionString("Default"));
+		var sql = "insert into Users (Id, Username, PWHash, Email) values (@Id, @Username, @PWHash, @Email) Returning *;";
 			conn.Open();
 			var inserted = conn.QuerySingle <User>(sql, new {Id = user.Id,Username = user.Username,PWHash = user.PWHash, Email = user.Email });
 			conn.Close();
@@ -26,17 +25,65 @@ public class SqliteDataProvider : IDataProvider
 		}
 		catch (Exception e)
 		{
+			conn.Close();
 			return Result.Fail<User>(e.Message);
 		}
 		
 	}
 
-	public Result<User> GetUser(string username)
+    public Result<Calendar> AddCalendar(string userId, string? name = "Default")
+    {
+        using SqliteConnection conn = new SqliteConnection(connectionString);
+        try
+        {
+            var sql = "insert into Calendars (Id, Name) values (@Id, @Name) returning *;";
+            conn.Open();
+			using var transaction = conn.BeginTransaction();
+            
+			var c = conn.QuerySingleOrDefault<Calendar>(sql, new { Id = Guid.NewGuid().ToString(), Name = name },transaction);
+			if(c == null) 
+			{ 
+				transaction.Rollback();
+				conn.Close();
+				return Result.Fail<Calendar>("Error Inserting Calendar");
+			}
+
+            sql = "insert into CalendarRoles (Role, UserId, CalendarId) values (@Role, @UserId, @CalendarId) returning *";
+            var r = conn.QuerySingleOrDefault(sql, new { Role = "OWNER", UserId = userId, CalendarId = c.Id }, transaction);
+            if (r == null)
+            {
+                transaction.Rollback();
+                conn.Close();
+                return Result.Fail<Calendar>("Error Inserting CalendarRole");
+            }
+
+			sql = "UPDATE Users SET LastCalendar = @CalId WHERE Id = @Id;";
+            var u = conn.Execute(sql, new { Id = userId, CalId = c.Id }, transaction);
+            if (u != 1)
+            {
+                transaction.Rollback();
+                conn.Close();
+                return Result.Fail<Calendar>("Error Updating LastCalendar");
+            }
+
+			transaction.Commit();
+			conn.Close();
+			return Result.Ok<Calendar>(c);
+
+        }
+        catch (Exception e)
+        {
+            conn.Close();
+            return Result.Fail<Calendar>(e.Message);
+        }
+    }
+
+    public Result<User> GetUser(string username)
 	{
+		using SqliteConnection conn = new SqliteConnection(connectionString);
 		try
 		{
 			var sql = "select * from Users where Lower(Username) = LOWER(@Username);";
-			using SqliteConnection conn = new SqliteConnection(_configuration.GetConnectionString("Default"));
 			conn.Open();
 			var u = conn.QuerySingleOrDefault<User>(sql, new { Username = username});
 			conn.Close();
@@ -44,7 +91,8 @@ public class SqliteDataProvider : IDataProvider
 		}
 		catch (Exception e)
 		{
-			return Result.Fail<User>(e.Message);			
+            conn.Close();
+            return Result.Fail<User>(e.Message);			
 		}
 	}
 
