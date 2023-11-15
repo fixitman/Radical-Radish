@@ -9,7 +9,9 @@ Welcome to your new app.
 
 <SurveyPrompt Title="How is Blazor working for you?" />
 
-<Radzen.Blazor.RadzenButton Text="@text" Click="@Click"></Radzen.Blazor.RadzenButton>
+<button class = "btn btn-light" @onclick="@Click">Click Me</button>
+
+
 
 @code{
     string text = "click me";
@@ -17,8 +19,7 @@ Welcome to your new app.
     async void Click()
     {
         bool? result =  await dialog.Confirm("The Message", "The Title");
-        
-    }
 
+    }
 
 }
