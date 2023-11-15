@@ -33,14 +33,13 @@ public class SqliteDataProvider : IDataProvider
 
     public Result<Calendar> AddCalendar(string userId, string? name = "Default")
     {
-        using SqliteConnection conn = new SqliteConnection(connectionString);
+		using SqliteConnection conn = new SqliteConnection(connectionString);
+		conn.Open();
+		var transaction = conn.BeginTransaction();
         try
         {
-            var sql = "insert into Calendars (Id, Name) values (@Id, @Name) returning *;";
-            conn.Open();
-			using var transaction = conn.BeginTransaction();
-            
-			var c = conn.QuerySingleOrDefault<Calendar>(sql, new { Id = Guid.NewGuid().ToString(), Name = name },transaction);
+			var sql = "insert into Calendars (Id, Name) values (@Id, @Name) returning *;";
+			var c = conn.QuerySingleOrDefault<Calendar>(sql, new { Id = Guid.NewGuid().ToString(), Name = name });
 			if(c == null) 
 			{ 
 				transaction.Rollback();
@@ -48,21 +47,21 @@ public class SqliteDataProvider : IDataProvider
 				return Result.Fail<Calendar>("Error Inserting Calendar");
 			}
 
-            sql = "insert into CalendarRoles (Role, UserId, CalendarId) values (@Role, @UserId, @CalendarId) returning *";
-            var r = conn.QuerySingleOrDefault(sql, new { Role = "OWNER", UserId = userId, CalendarId = c.Id }, transaction);
-            if (r == null)
-            {
-                transaction.Rollback();
-                conn.Close();
-                return Result.Fail<Calendar>("Error Inserting CalendarRole");
-            }
+			sql = "insert into CalendarRoles (Role, UserId, CalendarId) values (@Role, @UserId, @CalendarId) returning *";
+			var r = conn.QuerySingleOrDefault<CalendarRole>(sql, new { Role = "OWNER", UserId = userId, CalendarId = c.Id });
+			if (r == null)
+			{
+				transaction.Rollback();
+				conn.Close();
+				return Result.Fail<Calendar>("Error Inserting CalendarRole");
+			}
 
 			sql = "UPDATE Users SET LastCalendar = @CalId WHERE Id = @Id;";
-            var u = conn.Execute(sql, new { Id = userId, CalId = c.Id }, transaction);
+            var u = conn.Execute(sql, new { Id = userId, CalId = c.Id });
             if (u != 1)
             {
-                transaction.Rollback();
-                conn.Close();
+				transaction.Rollback();
+				conn.Close();
                 return Result.Fail<Calendar>("Error Updating LastCalendar");
             }
 
@@ -73,7 +72,8 @@ public class SqliteDataProvider : IDataProvider
         }
         catch (Exception e)
         {
-            conn.Close();
+			transaction.Rollback();
+			conn.Close();
             return Result.Fail<Calendar>(e.Message);
         }
     }
@@ -96,6 +96,24 @@ public class SqliteDataProvider : IDataProvider
 		}
 	}
 
-	
-	
+	public Result<CalendarRole> AddCalendarRole(string userId, string calenmdarId, string role)
+	{
+		using SqliteConnection conn = new SqliteConnection(connectionString);
+		try
+		{
+			var sql = "insert into CalendarRoles (Role, UserId, CalendarId) values (@Role, @UserId, @CalendarId) returning *";
+			var r = conn.QuerySingleOrDefault<CalendarRole>(sql, new { Role = role, UserId = userId, CalendarId = calenmdarId });
+			if (r == null)
+			{				
+				conn.Close();
+				return Result.Fail<CalendarRole>("Error Inserting CalendarRole");
+			}
+			return Result.Ok<CalendarRole>(r);
+		}
+		catch (Exception e)
+		{
+			conn.Close();
+			return Result.Fail<CalendarRole>(e.Message);
+		}
+	}
 }

@@ -2,7 +2,9 @@
 
 namespace RadzenUI.Data
 {
-    public interface IDataProvider
+    
+	
+	public interface IDataProvider
 	{
 		public Result<User> AddUser(User user);
 
@@ -11,6 +13,8 @@ namespace RadzenUI.Data
 
 
 		public Result<Calendar> AddCalendar(string userId, string? name);
+
+		public Result<CalendarRole> AddCalendarRole(string userId, string calenmdarId, string Role);
 
 	}
 }

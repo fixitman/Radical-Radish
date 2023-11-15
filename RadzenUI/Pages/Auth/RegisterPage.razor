@@ -76,16 +76,27 @@
 		{
 			//something went wrong. display a message.
 			await DialogService.Alert($"{added.Error}.", "Error adding user to database");
+			return;
 		}
-		else
-		{			
-			await DialogService.Alert("User Added.", "Success");					
 
-			//clear form
-			model = new RegisterRequest();
-			StateHasChanged();
-			
+		Result<Calendar> cal = data.AddCalendar(added.Value.Id, "Default");
+		if (cal.IsFailure)
+		{
+			//something went wrong. display a message.
+			await DialogService.Alert($"{cal.Error}.", $"Error adding a calendar for {added.Value.Username}");
+			return;
 		}
+
+
+
+
+		
+		await DialogService.Alert("User Added.", "Success");					
+
+		//clear form
+		model = new RegisterRequest();
+		StateHasChanged();
+			
 	}
 
 	protected override async Task OnAfterRenderAsync(bool firstRender)
