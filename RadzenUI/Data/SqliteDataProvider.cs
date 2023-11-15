@@ -17,7 +17,7 @@ public class SqliteDataProvider : IDataProvider
 		using SqliteConnection conn = new SqliteConnection(connectionString);
 		try
 		{
-		var sql = "insert into Users (Id, Username, PWHash, Email) values (@Id, @Username, @PWHash, @Email) Returning *;";
+			var sql = "insert into Users (Id, Username, PWHash, Email) values (@Id, @Username, @PWHash, @Email) Returning *;";
 			conn.Open();
 			var inserted = conn.QuerySingle <User>(sql, new {Id = user.Id,Username = user.Username,PWHash = user.PWHash, Email = user.Email });
 			conn.Close();

@@ -80,7 +80,7 @@
 		}
 
 		Result<Calendar> cal = data.AddCalendar(added.Value.Id, "Default");
-		if (cal.IsFailure)
+		if (cal.IsFailureOrEmpty)
 		{
 			//something went wrong. display a message.
 			await DialogService.Alert($"{cal.Error}.", $"Error adding a calendar for {added.Value.Username}");
