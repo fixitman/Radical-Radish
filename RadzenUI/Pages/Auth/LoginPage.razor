@@ -14,8 +14,8 @@
 <h3 class="text-center">Please Sign In</h3>
 
 <EditForm Model="request" OnValidSubmit="Submit" autocomplete="off">
-	<DataAnnotationsValidator/>	
-	
+	<DataAnnotationsValidator />
+
 	<div class="row justify-content-center my-5">
 		<div class="col-lg-8">
 			<ValidationSummary />
@@ -24,7 +24,7 @@
 			<InputText class="form-control mb-4" @bind-Value="@request.Username" />
 
 			<label class="form-label" for="@(()=>request.Password)">Password</label>
-			<InputText class="form-control mb-4" id="password" type="password" @bind-Value="@request.Password"/>
+			<InputText class="form-control mb-4" id="password" type="password" @bind-Value="@request.Password" />
 
 			<button type="submit" class="btn btn-primary"> Submit</button>
 		</div>
@@ -34,41 +34,40 @@
 
 
 @code {
-		[Parameter]
-		public string? ReturnUrl { get; set; }
+	[Parameter]
+	public string? ReturnUrl { get; set; }
 
-		LoginRequest request = new LoginRequest();
+	LoginRequest request = new LoginRequest();
 
-		async void Submit()
+	async void Submit()
+	{
+		// Get user
+
+		Result<User> r = data.GetUser(request.Username.ToLower());
+		if (r.IsFailure) // database or network problems
 		{
-			// Get user
+			await dialog.Alert(r.Error, "Error");
+			request = new();
+			StateHasChanged();
+			return;
+		}
 
-			Result<User> r = data.GetUser(request.Username.ToLower());
-			if (r.IsFailure) // database or network problems
-			{
-				await dialog.Alert(r.Error, "Error");
-				request = new();
-				StateHasChanged();
-				return;
-			}
+		// Check credentials
+		if (r.IsEmpty || !BCrypt.Verify(request.Password, r.Value.PWHash))
+		{
+			await dialog.Alert("Incorrect Username or Password", "Error");
+			return;
+		}
 
-			// Check credentials
-			if( r.IsEmpty || !BCrypt.Verify(request.Password,r.Value.PWHash)) 
-			{
-				await dialog.Alert("Incorrect Username or Password", "Error");
-				return;
-			}
-
-			var authState = await ((CustomAuthStateProvider)AuthStateProvider).ChangeUser(r.Value.Id, r.Value.Username, "Admin");
-			await Session.SetAsync("AuthUser", new
-			{
-				Id = r.Value.Id,
-				Username = r.Value.Username,
-				Role = "Admin"
-			});
+		var authState = await ((CustomAuthStateProvider)AuthStateProvider).ChangeUser(r.Value.Id, r.Value.Username, "Admin");
+		await Session.SetAsync("AuthUser", new
+		{
+			Id = r.Value.Id,
+			Username = r.Value.Username,
+			Role = "Admin"
+		});
 		var u = authState.User;
-		
-		
+
 		NavMgr.NavigateTo(ReturnUrl ?? "/");
 	}
 }

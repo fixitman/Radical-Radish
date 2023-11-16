@@ -1,4 +1,5 @@
-﻿using RadzenUI.Pages.Auth.Models;
+﻿using Microsoft.AspNetCore.Mvc.TagHelpers;
+using RadzenUI.Pages.Auth.Models;
 
 
 
@@ -6,9 +7,18 @@ namespace RadzenUI.Data;
 
 public class AppState
 {
-    public AppUser? User { get; set; }
+	private AppUser? user;
 
-    public string ReturnTo { get; set; } = "";
-   
+	public AppUser? User { 
+		get => user; 
+		set
+		{
+			user = value;
+			Persist();
+		}  
+	}
+
+
+
 }
 
