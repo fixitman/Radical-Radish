@@ -1,4 +1,12 @@
-﻿<CascadingAuthenticationState>
+﻿@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
+@using RadzenUI.auth;
+@inject ProtectedSessionStorage Session
+@inject AppState AppState
+@inject ILogger<App> logger
+@inject AuthenticationStateProvider AuthStateProvider
+
+
+<CascadingAuthenticationState>
     <Router AppAssembly="@typeof(App).Assembly">
         <Found Context="routeData">
             <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" >
@@ -16,3 +24,18 @@
         </NotFound>
     </Router>
 </CascadingAuthenticationState>
+
+
+@code {
+
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await AppState.InitializeAsync(Session);
+        if(AppState.User != null && !string.IsNullOrEmpty(AppState.User.Id))
+        {
+            await ((CustomAuthStateProvider)AuthStateProvider).ChangeUser(AppState.User.Id, AppState.User.Username, AppState.User.Role);
+        }
+        await base.OnAfterRenderAsync(firstRender);
+    }
+}

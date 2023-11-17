@@ -39,6 +39,12 @@
 
 	LoginRequest request = new LoginRequest();
 
+	protected override void OnInitialized()
+	{
+		base.OnInitialized();
+		AuthStateProvider.AuthenticationStateChanged += OnAuthStateChange;
+	}
+
 	async void Submit()
 	{
 		// Get user
@@ -59,15 +65,20 @@
 			return;
 		}
 
-		var authState = await ((CustomAuthStateProvider)AuthStateProvider).ChangeUser(r.Value.Id, r.Value.Username, "Admin");
-		await Session.SetAsync("AuthUser", new
-		{
-			Id = r.Value.Id,
-			Username = r.Value.Username,
-			Role = "Admin"
-		});
+		var authState = await ((CustomAuthStateProvider)AuthStateProvider).ChangeUser(r.Value.Id, r.Value.Username, r.Value.AppRole);
+
 		var u = authState.User;
+		AppState.User = new AppUser { Id = r.Value.Id, Email = r.Value.Email, Username = r.Value.Username, Role = r.Value.AppRole };
 
 		NavMgr.NavigateTo(ReturnUrl ?? "/");
+	}
+
+	public async void OnAuthStateChange(Task<AuthenticationState> task)
+	{
+		var state = await task;
+		if(state.User.Identity?.IsAuthenticated ?? false)
+		{
+			NavMgr.NavigateTo(ReturnUrl ?? "/");			
+		}
 	}
 }
