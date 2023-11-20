@@ -1,0 +1,40 @@
+﻿@using RadzenUI.Data;
+@inject IDataProvider data
+
+
+<h3>CalendarList</h3>
+
+
+	@foreach (CalendarDTO c in Calendars){
+		<p>@($"{c.CalendarName} - ({c.CalendarId})") </p>
+	}
+
+
+@code {
+	[Parameter]
+	public string UserId { get; set; } = string.Empty;
+	public IEnumerable<CalendarDTO> Calendars { get; set; } = Enumerable.Empty<CalendarDTO>();
+
+	protected override Task OnInitializedAsync()
+	{
+
+		if (!string.IsNullOrEmpty(UserId))
+		{
+			var result = data.GetCalendars(UserId);
+			Calendars = result.Success ? result.Value : Enumerable.Empty<CalendarDTO>();
+
+			var myCal = Calendars.Where(c => c.CalendarRole == "OWNER").OrderBy(c=>c.CalendarName).ToList();
+			var otherUsers = Calendars.Where(c => c.CalendarRole != "OWNER")
+				.Select(c => new {c.UserId, c.Username}).DistinctBy(c=>c.UserId)
+				.OrderBy(c=> c.Username.ToLower())
+				.ToList();
+			foreach(var o in otherUsers)
+			{
+				Console.WriteLine(o.Username);
+			}
+
+		}
+		return Task.CompletedTask;
+	}
+
+}

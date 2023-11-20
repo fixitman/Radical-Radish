@@ -30,6 +30,26 @@ public class SqliteDataProvider : IDataProvider
 		}
 		
 	}
+	public Result<IEnumerable<CalendarDTO>> GetCalendars(string _userId)
+	{
+		using SqliteConnection conn = new SqliteConnection(connectionString);
+		try
+		{
+			var sql = @"SELECT Calendars.Id as CalendarId, Calendars.Name as CalendarName, Users.Id as UserId, Users.Username,CalendarRoles.Role as CalendarRole
+FROM Calendars INNER JOIN CalendarRoles on Calendars.Id = CalendarRoles.CalendarId
+INNER JOIN Users ON CalendarRoles.UserId = Users.Id
+Where CalendarRoles.UserId = @UserId;";
+			conn.Open();
+			var u = conn.Query<CalendarDTO>(sql, new { UserId = _userId });
+			conn.Close();
+			return u is null ? Result.Empty<IEnumerable<CalendarDTO>>() : Result.Ok<IEnumerable<CalendarDTO>>(u);
+		}
+		catch (Exception e)
+		{
+			conn.Close();
+			return Result.Fail<IEnumerable<CalendarDTO>>(e.Message);
+		}
+	}
 
     public Result<Calendar> AddCalendar(string userId, string? name = "Default")
     {
@@ -116,4 +136,5 @@ public class SqliteDataProvider : IDataProvider
 			return Result.Fail<CalendarRole>(e.Message);
 		}
 	}
+
 }
