@@ -5,6 +5,7 @@
 @inject AppState AppState
 @inject NavigationManager NavMgr
 @inject AuthenticationStateProvider AuthStateProvider
+@implements IDisposable
 
 
 <div class="top-row ps-3 navbar navbar-dark">
@@ -87,5 +88,10 @@
         var authState = await((CustomAuthStateProvider)AuthStateProvider).Logout();
         await Session.DeleteAsync("AuthUser");
         NavMgr.NavigateTo("/Account/Login");
+    }
+
+    public void Dispose()
+    {
+        AuthStateProvider.AuthenticationStateChanged -= OnAuthStateChange;
     }
 }
