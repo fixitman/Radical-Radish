@@ -2,11 +2,11 @@
 @inject IDataProvider data
 
 
-<h3>CalendarList</h3>
+<h4>CalendarList</h4>
 
 
 	@foreach (CalendarDTO c in Calendars){
-		<p>@($"{c.CalendarName} - ({c.CalendarId})") </p>
+		<p>@($"{c.CalendarName} - ({c.OwnerName})") </p>
 	}
 
 
@@ -25,12 +25,12 @@
 
 			var myCal = Calendars.Where(c => c.CalendarRole == "OWNER").OrderBy(c=>c.CalendarName).ToList();
 			var otherUsers = Calendars.Where(c => c.CalendarRole != "OWNER")
-				.Select(c => new {c.UserId, c.Username}).DistinctBy(c=>c.UserId)
-				.OrderBy(c=> c.Username.ToLower())
+				.Select(c => new {c.OwnerId, c.OwnerName}).DistinctBy(c=>c.OwnerId)
+				.OrderBy(c=> c.OwnerName.ToLower())
 				.ToList();
 			foreach(var o in otherUsers)
 			{
-				Console.WriteLine(o.Username);
+				Console.WriteLine(o.OwnerName);
 			}
 
 		}

@@ -1,17 +1,20 @@
 ﻿using Dapper;
 using Microsoft.Data.Sqlite;
+using System.Data;
+using System.Globalization;
 
 namespace RadzenUI.Data;
 
 public class SqliteDataProvider : IDataProvider
 {
 	private string connectionString;
-
 	public SqliteDataProvider(IConfiguration configuration)
     {
 		connectionString = configuration.GetConnectionString("Default");
 	}
 
+
+	// Users
 	public Result<User> AddUser(User user)
 	{
 		using SqliteConnection conn = new SqliteConnection(connectionString);
@@ -30,27 +33,26 @@ public class SqliteDataProvider : IDataProvider
 		}
 		
 	}
-	public Result<IEnumerable<CalendarDTO>> GetCalendars(string _userId)
+    public Result<User> GetUser(string username)
 	{
 		using SqliteConnection conn = new SqliteConnection(connectionString);
 		try
 		{
-			var sql = @"SELECT Calendars.Id as CalendarId, Calendars.Name as CalendarName, Users.Id as UserId, Users.Username,CalendarRoles.Role as CalendarRole
-FROM Calendars INNER JOIN CalendarRoles on Calendars.Id = CalendarRoles.CalendarId
-INNER JOIN Users ON CalendarRoles.UserId = Users.Id
-Where CalendarRoles.UserId = @UserId;";
+			var sql = "select * from Users where Lower(Username) = LOWER(@Username);";
 			conn.Open();
-			var u = conn.Query<CalendarDTO>(sql, new { UserId = _userId });
+			var u = conn.QuerySingleOrDefault<User>(sql, new { Username = username});
 			conn.Close();
-			return u is null ? Result.Empty<IEnumerable<CalendarDTO>>() : Result.Ok<IEnumerable<CalendarDTO>>(u);
+			return u is null ? Result.Empty<User>(): Result.Ok<User>(u);
 		}
 		catch (Exception e)
 		{
-			conn.Close();
-			return Result.Fail<IEnumerable<CalendarDTO>>(e.Message);
+            conn.Close();
+            return Result.Fail<User>(e.Message);			
 		}
 	}
 
+
+	//Calendars
     public Result<Calendar> AddCalendar(string userId, string? name = "Default")
     {
 		using SqliteConnection conn = new SqliteConnection(connectionString);
@@ -98,24 +100,6 @@ Where CalendarRoles.UserId = @UserId;";
         }
     }
 
-    public Result<User> GetUser(string username)
-	{
-		using SqliteConnection conn = new SqliteConnection(connectionString);
-		try
-		{
-			var sql = "select * from Users where Lower(Username) = LOWER(@Username);";
-			conn.Open();
-			var u = conn.QuerySingleOrDefault<User>(sql, new { Username = username});
-			conn.Close();
-			return u is null ? Result.Empty<User>(): Result.Ok<User>(u);
-		}
-		catch (Exception e)
-		{
-            conn.Close();
-            return Result.Fail<User>(e.Message);			
-		}
-	}
-
 	public Result<CalendarRole> AddCalendarRole(string userId, string calenmdarId, string role)
 	{
 		using SqliteConnection conn = new SqliteConnection(connectionString);
@@ -137,4 +121,39 @@ Where CalendarRoles.UserId = @UserId;";
 		}
 	}
 
+	public Result<IEnumerable<CalendarDTO>> GetCalendars(string _userId)
+	{
+			var sql = 
+@"SELECT Calendars.id as CalendarId, Calendars.Name as CalendarName, CalendarRoles.Role as CalendarRole, OwnerId, OwnerName
+FROM Calendars inner join CalendarRoles on CalendarRoles.CalendarId = Calendars.Id
+inner join 
+	(SELECT Users.Id as OwnerId, Users.Username as OwnerName, CalendarRoles.CalendarId as OwnedCalendarId
+	from CalendarRoles Inner Join Users on Users.Id = CalendarRoles.UserId
+	where CalendarRoles.Role = 'OWNER') 
+on Calendars.Id = OwnedCalendarId
+where CalendarRoles.UserId = @UserId;";
+
+		using SqliteConnection conn = new SqliteConnection(connectionString);
+		try
+		{
+			conn.Open();
+			var u = conn.Query<CalendarDTO>(sql, new { UserId = _userId });
+			conn.Close();
+			return u is null ? Result.Empty<IEnumerable<CalendarDTO>>() : Result.Ok<IEnumerable<CalendarDTO>>(u);
+		}
+		catch (Exception e)
+		{
+			conn.Close();
+			return Result.Fail<IEnumerable<CalendarDTO>>(e.Message);
+        }
+    }
 }
+
+
+//var sql = @"SELECT Calendars.Id as CalendarId, Calendars.Name as CalendarName, Users.Id as UserId, Users.Username,CalendarRoles.Role as CalendarRole
+//FROM Calendars INNER JOIN CalendarRoles on Calendars.Id = CalendarRoles.CalendarId
+//INNER JOIN Users ON CalendarRoles.UserId = Users.Id
+//Where CalendarRoles.UserId = @UserId;";
+
+
+
