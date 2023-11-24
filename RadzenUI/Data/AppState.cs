@@ -1,42 +1,59 @@
 ﻿using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
-using Microsoft.AspNetCore.Mvc.TagHelpers;
 using RadzenUI.Pages.Auth.Models;
-
-
 
 namespace RadzenUI.Data;
 
 public class AppState
 {
-	private static readonly string APPUSER = "AppUser";
+	private static readonly string APPSTATE = "AppState";
 	
-	private AppUser? user;
+	private AppUser? _user;
+    private Calendar? _currentCalendar;
+
+    public event EventHandler<AppUser?>? UserChanged;
+    public event EventHandler<Calendar?>? CalendarChanged;
 
 	public ProtectedSessionStorage? Session { get; set; } = null;
 
-    public AppUser? User { 
-		get => user; 
+    public Calendar? CurrentCalendar { 
+		get => _currentCalendar;
 		set
 		{
-			user = value;
-			Save();	
+			_currentCalendar = value;
+			CalendarChanged?.Invoke(this, _currentCalendar);
+			_ = SaveToSession();
+		}
+	} 
+
+    public AppUser? User { 
+		get => _user; 
+		set
+		{
+			_user = value;
+			UserChanged?.Invoke(this, _user);
+            _ = SaveToSession();	
 		}  
 	}
 
-	public async Task Load()
+	public async Task LoadFromSession()
 	{
 		if(Session != null)
 		{
-			var r = await Session.GetAsync<AppUser>(APPUSER);
-			if(r.Success) user = r.Value;
+			var r = await Session.GetAsync<AppState>(APPSTATE);
+			if (r.Success)
+			{
+				_user = r.Value.User;
+				_currentCalendar = r.Value.CurrentCalendar;
+
+			}
 		}
 	}
 
-    public async Task Save()
+    public async Task SaveToSession()
     {
        if(Session != null && User != null)
 		{
-			await Session.SetAsync(APPUSER,User);
+			await Session.SetAsync(APPSTATE, this);
 		}
         
     }
@@ -44,7 +61,7 @@ public class AppState
 	public async Task InitializeAsync(ProtectedSessionStorage session)
 	{
 		Session = session;
-		await Load();
+		await LoadFromSession();
 	}
 
 }

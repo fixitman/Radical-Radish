@@ -1,5 +1,7 @@
 ﻿@page "/"
 @inject DialogService dialog
+@inject IDataProvider data
+@inject AppState AppState
 
 <PageTitle>Index</PageTitle>
 
@@ -13,6 +15,10 @@ Welcome to your new app.
 
 <CalendarList UserId="e6b153cf-594d-4318-b1ad-759d38cfde73" />
 
+<RadzenButton Click="CreateCalendar">
+    Create a Calendar
+</RadzenButton>
+
 
 
 
@@ -22,7 +28,16 @@ Welcome to your new app.
     async void Click()
     {
         bool? result =  await dialog.Confirm("The Message", "The Title");
+    }
 
+    void CreateCalendar(MouseEventArgs args)
+    {
+        string name = "The new calendar";
+        if(!string.IsNullOrEmpty(AppState.User?.Id))
+        {
+            data.AddCalendar(AppState.User!.Id!, name);
+            StateHasChanged();
+        }
     }
 
 }
