@@ -7,10 +7,11 @@ public class AppState
 {
 	private static readonly string APPSTATE = "AppState";
 	
-	private AppUser? _user;
+	public static AppUser Anonymous { get; private set; } = new AppUser { Email = "", Id = "", Role = "", Username = "" };
+	private AppUser _user = Anonymous;
     private Calendar? _currentCalendar;
 
-    public event EventHandler<AppUser?>? UserChanged;
+    public event EventHandler<AppUser>? UserChanged;
     public event EventHandler<Calendar?>? CalendarChanged;
 
 	public ProtectedSessionStorage? Session { get; set; } = null;
@@ -25,7 +26,7 @@ public class AppState
 		}
 	} 
 
-    public AppUser? User { 
+    public AppUser User { 
 		get => _user; 
 		set
 		{
@@ -35,14 +36,14 @@ public class AppState
 		}  
 	}
 
-	public async Task LoadFromSession()
+    public async Task LoadFromSession()
 	{
 		if(Session != null)
 		{
 			var r = await Session.GetAsync<AppState>(APPSTATE);
 			if (r.Success)
 			{
-				_user = r.Value.User;
+				_user = r.Value!.User;
 				_currentCalendar = r.Value.CurrentCalendar;
 
 			}
