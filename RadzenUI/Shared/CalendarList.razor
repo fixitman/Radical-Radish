@@ -15,12 +15,12 @@
 	public string UserId { get; set; } = string.Empty;
 	public IEnumerable<CalendarDTO> Calendars { get; set; } = Enumerable.Empty<CalendarDTO>();
 
-	protected override Task OnInitializedAsync()
+	protected override async Task OnInitializedAsync()
 	{
 
 		if (!string.IsNullOrEmpty(UserId))
 		{
-			var result = data.GetCalendars(UserId);
+			var result = await data.GetCalendars(UserId);
 			Calendars = result.Success ? result.Value : Enumerable.Empty<CalendarDTO>();
 
 			var myCal = Calendars.Where(c => c.CalendarRole == "OWNER").OrderBy(c=>c.CalendarName).ToList();
@@ -34,7 +34,7 @@
 			}
 
 		}
-		return Task.CompletedTask;
+		return ;
 	}
 
 }

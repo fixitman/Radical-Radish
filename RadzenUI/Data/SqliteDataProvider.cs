@@ -15,7 +15,7 @@ public class SqliteDataProvider : IDataProvider
 
 
 	// Users
-	public Result<User> AddUser(User user)
+	public Task<Result<User>> AddUser(User user)
 	{
 		using SqliteConnection conn = new SqliteConnection(connectionString);
 		try
@@ -24,16 +24,16 @@ public class SqliteDataProvider : IDataProvider
 			conn.Open();
 			var inserted = conn.QuerySingle <User>(sql, new {Id = user.Id,Username = user.Username,PWHash = user.PWHash, Email = user.Email });
 			conn.Close();
-			return Result.Ok(inserted);
+			return Task.FromResult(Result.Ok(inserted));
 		}
 		catch (Exception e)
 		{
 			conn.Close();
-			return Result.Fail<User>(e.Message);
+			return Task.FromResult(Result.Fail<User>(e.Message));
 		}
 		
 	}
-    public Result<User> GetUser(string username)
+    public Task<Result<User>> GetUser(string username)
 	{
 		using SqliteConnection conn = new SqliteConnection(connectionString);
 		try
@@ -42,18 +42,18 @@ public class SqliteDataProvider : IDataProvider
 			conn.Open();
 			var u = conn.QuerySingleOrDefault<User>(sql, new { Username = username});
 			conn.Close();
-			return u is null ? Result.Empty<User>(): Result.Ok<User>(u);
+			return u is null ? Task.FromResult(Result.Empty<User>()) : Task.FromResult(Result.Ok<User>(u));
 		}
 		catch (Exception e)
 		{
             conn.Close();
-            return Result.Fail<User>(e.Message);			
+            return Task.FromResult(Result.Fail<User>(e.Message));			
 		}
 	}
 
 
 	//Calendars
-    public Result<Calendar> AddCalendar(string userId, string? name = "Default")
+    public Task<Result<Calendar>> AddCalendar(string userId, string? name = "Default")
     {
 		using SqliteConnection conn = new SqliteConnection(connectionString);
 		conn.Open();
@@ -66,7 +66,7 @@ public class SqliteDataProvider : IDataProvider
 			{ 
 				transaction.Rollback();
 				conn.Close();
-				return Result.Fail<Calendar>("Error Inserting Calendar");
+				return Task.FromResult(Result.Fail<Calendar>("Error Inserting Calendar"));
 			}
 
 			sql = "insert into CalendarRoles (Role, UserId, CalendarId) values (@Role, @UserId, @CalendarId) returning *";
@@ -75,7 +75,7 @@ public class SqliteDataProvider : IDataProvider
 			{
 				transaction.Rollback();
 				conn.Close();
-				return Result.Fail<Calendar>("Error Inserting CalendarRole");
+				return Task.FromResult(Result.Fail<Calendar>("Error Inserting CalendarRole"));
 			}
 
 			sql = "UPDATE Users SET LastCalendar = @CalId WHERE Id = @Id;";
@@ -84,23 +84,23 @@ public class SqliteDataProvider : IDataProvider
             {
 				transaction.Rollback();
 				conn.Close();
-                return Result.Fail<Calendar>("Error Updating LastCalendar");
+                return Task.FromResult(Result.Fail<Calendar>("Error Updating LastCalendar"));
             }
 
 			transaction.Commit();
 			conn.Close();
-			return Result.Ok<Calendar>(c);
+			return Task.FromResult(Result.Ok<Calendar>(c));
 
         }
         catch (Exception e)
         {
 			transaction.Rollback();
 			conn.Close();
-            return Result.Fail<Calendar>(e.Message);
+            return Task.FromResult(Result.Fail<Calendar>(e.Message));
         }
     }
 
-	public Result<CalendarRole> AddCalendarRole(string userId, string calenmdarId, string role)
+	public Task<Result<CalendarRole>> AddCalendarRole(string userId, string calenmdarId, string role)
 	{
 		using SqliteConnection conn = new SqliteConnection(connectionString);
 		try
@@ -110,18 +110,18 @@ public class SqliteDataProvider : IDataProvider
 			if (r == null)
 			{				
 				conn.Close();
-				return Result.Fail<CalendarRole>("Error Inserting CalendarRole");
+				return Task.FromResult(Result.Fail<CalendarRole>("Error Inserting CalendarRole"));
 			}
-			return Result.Ok<CalendarRole>(r);
+			return Task.FromResult(Result.Ok<CalendarRole>(r));
 		}
 		catch (Exception e)
 		{
 			conn.Close();
-			return Result.Fail<CalendarRole>(e.Message);
+			return Task.FromResult(Result.Fail<CalendarRole>(e.Message));
 		}
 	}
 
-	public Result<IEnumerable<CalendarDTO>> GetCalendars(string _userId)
+	public Task<Result<IEnumerable<CalendarDTO>>> GetCalendars(string _userId)
 	{
 			var sql = 
 @"SELECT Calendars.id as CalendarId, Calendars.Name as CalendarName, CalendarRoles.Role as CalendarRole, OwnerId, OwnerName
@@ -139,12 +139,12 @@ where CalendarRoles.UserId = @UserId;";
 			conn.Open();
 			var u = conn.Query<CalendarDTO>(sql, new { UserId = _userId });
 			conn.Close();
-			return u is null ? Result.Empty<IEnumerable<CalendarDTO>>() : Result.Ok<IEnumerable<CalendarDTO>>(u);
+			return u is	null ? Task.FromResult(Result.Empty<IEnumerable<CalendarDTO>>()) : Task.FromResult(Result.Ok<IEnumerable<CalendarDTO>>(u));
 		}
 		catch (Exception e)
 		{
 			conn.Close();
-			return Result.Fail<IEnumerable<CalendarDTO>>(e.Message);
+			return Task.FromResult(Result.Fail<IEnumerable<CalendarDTO>>(e.Message));
         }
     }
 }

@@ -49,7 +49,7 @@
 	{
 		// Get user
 
-		Result<User> r = data.GetUser(request.Username.ToLower());
+		Result<User> r = await data.GetUser(request.Username.ToLower());
 		if (r.IsFailure) // database or network problems
 		{
 			await dialog.Alert(r.Error, "Error");

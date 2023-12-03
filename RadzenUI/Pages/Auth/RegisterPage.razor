@@ -47,7 +47,7 @@
 	async void Submit()
 	{
 		// Check if user exists
-		Result<User> u = data.GetUser(model.Username);
+		Result<User> u = await data.GetUser(model.Username);
 		if(u.IsFailure && !u.IsEmpty) // Something's wrong!
 		{
 			await DialogService.Alert(u.Error, "Error");
@@ -71,7 +71,7 @@
 				PWHash = BCrypt.Net.BCrypt.HashPassword(model.Password)
 			};
 
-		Result<User> added = data.AddUser(newUser);
+		Result<User> added = await data.AddUser(newUser);
 		if(added.IsFailureOrEmpty)
 		{
 			//something went wrong. display a message.
@@ -79,7 +79,7 @@
 			return;
 		}
 
-		Result<Calendar> cal = data.AddCalendar(added.Value.Id, "Default");
+		Result<Calendar> cal = await data.AddCalendar(added.Value.Id, "Default");
 		if (cal.IsFailureOrEmpty)
 		{
 			//something went wrong. display a message.
