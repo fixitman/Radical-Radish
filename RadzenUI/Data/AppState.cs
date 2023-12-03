@@ -16,6 +16,16 @@ public class AppState
 
 	public ProtectedSessionStorage? Session { get; set; } = null;
 
+    public AppUser? User { 
+		get => _user; 
+		set
+		{
+			_user = value;
+			UserChanged?.Invoke(this, _user);
+            _ = SaveToSession();	
+		}  
+	}
+
     public Calendar? CurrentCalendar { 
 		get => _currentCalendar;
 		set
@@ -25,16 +35,6 @@ public class AppState
 			_ = SaveToSession();
 		}
 	} 
-
-    public AppUser User { 
-		get => _user; 
-		set
-		{
-			_user = value;
-			UserChanged?.Invoke(this, _user);
-            _ = SaveToSession();	
-		}  
-	}
 
     public async Task LoadFromSession()
 	{
