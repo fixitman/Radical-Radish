@@ -53,8 +53,9 @@ public class AppState
         await LoadCalendars();
 
 
-        //  Set Current Calendar
-
+		//  ToDo Set Current Calendar
+				
+		var x = Calendars.Any(c => c.CalendarId == User.LastCalendar);
 
     }
 
@@ -113,8 +114,8 @@ public class AppState
     
 }
 
-//	ToDo listen for change in login state and load all data
-//  Get/clear user, calendar list, current calendar and and appointments when user changes
+//	
+//  todo Get/clear user, calendar list, current calendar and and appointments when user changes
 //  todo load appointments when currentCalendar changes
 //  
 

@@ -65,7 +65,7 @@
 			return;
 		}
 
-		AppState.User = new AppUser { Id = r.Value.Id, Email = r.Value.Email, Username = r.Value.Username, Role = r.Value.AppRole };
+		AppState.User = new AppUser { Id = r.Value.Id, Email = r.Value.Email, Username = r.Value.Username, Role = r.Value.AppRole, LastCalendar = r.Value.LastCalendar };
 				
 		var authState = await ((CustomAuthStateProvider)AuthStateProvider).ChangeUser(r.Value.Id, r.Value.Username, r.Value.AppRole);
 
