@@ -23,6 +23,7 @@ public class AppState
 	public ObservableCollection<CalendarDTO> Calendars { get; set; } = new ObservableCollection<CalendarDTO>();
 
 
+
     public AppUser User { 
 		get => _user; 
 		set
@@ -86,12 +87,10 @@ public class AppState
 	{
 		if(Session != null)
 		{
-			var r = await Session.GetAsync<AppState>(APPSTATE);
+			var r = await Session.GetAsync<AppUser>(APPUSER);
 			if (r.Success)
 			{
-				_user = r.Value!.User;
-				_currentCalendar = r.Value.CurrentCalendar;
-
+				User = r.Value!;
 			}
 		}
 	}
@@ -108,7 +107,7 @@ public class AppState
 	public async Task InitializeAsync(ProtectedSessionStorage session)
 	{
 		Session = session;
-		await LoadFromSession();
+		
 	}
 
     

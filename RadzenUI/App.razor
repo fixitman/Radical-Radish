@@ -32,10 +32,7 @@
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         await AppState.InitializeAsync(Session);
-        if(AppState.User != null && !string.IsNullOrEmpty(AppState.User.Id))
-        {
-            await ((CustomAuthStateProvider)AuthStateProvider).ChangeUser(AppState.User.Id, AppState.User.Username, AppState.User.Role);
-        }
+       
         await base.OnAfterRenderAsync(firstRender);
     }
 }
