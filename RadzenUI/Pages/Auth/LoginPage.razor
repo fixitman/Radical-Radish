@@ -65,10 +65,9 @@
 			return;
 		}
 
-		var authState = await ((CustomAuthStateProvider)AuthStateProvider).ChangeUser(r.Value.Id, r.Value.Username, r.Value.AppRole);
-
-		var u = authState.User;
 		AppState.User = new AppUser { Id = r.Value.Id, Email = r.Value.Email, Username = r.Value.Username, Role = r.Value.AppRole };
+				
+		var authState = await ((CustomAuthStateProvider)AuthStateProvider).ChangeUser(r.Value.Id, r.Value.Username, r.Value.AppRole);
 
 		NavMgr.NavigateTo(ReturnUrl ?? "/");
 	}

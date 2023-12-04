@@ -30,13 +30,16 @@ Welcome to your new app.
         bool? result =  await dialog.Confirm("The Message", "The Title");
     }
 
-    void CreateCalendar(MouseEventArgs args)
+    async Task CreateCalendar(MouseEventArgs args)
     {
         string name = "The new calendar";
         if(!string.IsNullOrEmpty(AppState.User?.Id))
         {
-            data.AddCalendar(AppState.User!.Id!, name);
-            StateHasChanged();
+            var c = await data.AddCalendar(AppState.User!.Id!, name);
+            if (c.Success)
+            {
+                await AppState.LoadCalendars();
+            }
         }
     }
 

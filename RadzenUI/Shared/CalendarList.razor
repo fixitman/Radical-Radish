@@ -1,40 +1,50 @@
 ﻿@using RadzenUI.Data;
+@using System.Collections.Specialized
 @inject IDataProvider data
+@inject AppState AppState
+@implements IDisposable
 
 
 <h4>CalendarList</h4>
 
 
-	@foreach (CalendarDTO c in Calendars){
+	@foreach (CalendarDTO c in AppState.Calendars){
 		<p>@($"{c.CalendarName} - ({c.OwnerName})") </p>
 	}
 
 
 @code {
 	[Parameter]
-	public string UserId { get; set; } = string.Empty;
-	public IEnumerable<CalendarDTO> Calendars { get; set; } = Enumerable.Empty<CalendarDTO>();
+	public string UserId { get; set; } = string.Empty;	
 
 	protected override async Task OnInitializedAsync()
 	{
 
-		if (!string.IsNullOrEmpty(UserId))
-		{
-			var result = await data.GetCalendars(UserId);
-			Calendars = result.Success ? result.Value : Enumerable.Empty<CalendarDTO>();
+		AppState.Calendars.CollectionChanged += OnCollectionChanged;
+		// if (AppState.Calendars.Count > 0)
+		// {
+		// 	var myCal = Calendars.Where(c => c.CalendarRole == "OWNER").OrderBy(c=>c.CalendarName).ToList();
+		// 	var otherUsers = Calendars.Where(c => c.CalendarRole != "OWNER")
+		// 		.Select(c => new {c.OwnerId, c.OwnerName}).DistinctBy(c=>c.OwnerId)
+		// 		.OrderBy(c=> c.OwnerName.ToLower())
+		// 		.ToList();
+		// 	foreach(var o in otherUsers)
+		// 	{
+		// 		Console.WriteLine(o.OwnerName);
+		// 	}
 
-			var myCal = Calendars.Where(c => c.CalendarRole == "OWNER").OrderBy(c=>c.CalendarName).ToList();
-			var otherUsers = Calendars.Where(c => c.CalendarRole != "OWNER")
-				.Select(c => new {c.OwnerId, c.OwnerName}).DistinctBy(c=>c.OwnerId)
-				.OrderBy(c=> c.OwnerName.ToLower())
-				.ToList();
-			foreach(var o in otherUsers)
-			{
-				Console.WriteLine(o.OwnerName);
-			}
+		// }
+		return;
+	}
 
-		}
-		return ;
+	public void OnCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+	{
+		StateHasChanged();
+	}
+
+	public void Dispose()
+	{
+		AppState.Calendars.CollectionChanged -= OnCollectionChanged;
 	}
 
 }
