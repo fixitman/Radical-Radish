@@ -50,6 +50,23 @@ public class SqliteDataProvider : IDataProvider
             return Task.FromResult(Result.Fail<User>(e.Message));			
 		}
 	}
+	public Task<Result> SetUsersLastCalendar(string userId, string calendarId)
+	{
+        using SqliteConnection conn = new SqliteConnection(connectionString);
+        try
+        {
+            var sql = "UPDATE Users SET LastCalendar = @CalId WHERE Id = @UserId;";
+            conn.Open();
+            var updated = conn.ExecuteAsync (sql, new { UserId = userId, CalId = calendarId});
+            conn.Close();
+            return Task.FromResult(Result.Ok());
+        }
+        catch (Exception e)
+        {
+            conn.Close();
+            return Task.FromResult(Result.Fail(e.Message));
+        }
+    }
 
 
 	//Calendars
@@ -146,6 +163,52 @@ where CalendarRoles.UserId = @UserId;";
 			conn.Close();
 			return Task.FromResult(Result.Fail<IEnumerable<CalendarDTO>>(e.Message));
         }
+    }
+
+    public Task<Result<IEnumerable<Appointment>>> GetAppointments(string calendarId, DateTime start, DateTime end)
+	{
+        var sql = @"SELECT * from Appointments where CalendarId = @CalId AND
+	(Start BETWEEN @Start AND @End or End BETWEEN @Start and @End)";
+
+        using SqliteConnection conn = new SqliteConnection(connectionString);
+        try
+        {
+            conn.Open();
+            var u = conn.Query<Appt>(sql, new {CalId = calendarId, Start = start.Ticks, End = end.Ticks });
+            conn.Close();
+			if(u is null)
+			{
+				return Task.FromResult(Result.Empty<IEnumerable<Appointment>>());
+            }
+			else
+			{
+				var appointments = u.Select(a => new Appointment() {
+					Id = a.Id,
+					Start = new DateTime(a.Start),
+					End = new DateTime(a.End),
+					Color = a.Color,
+					IsAllDay = a.IsAllDay,
+					Text = a.Text
+				});
+				return  Task.FromResult(Result.Ok<IEnumerable<Appointment>>(appointments));
+			}
+        }
+        catch (Exception e)
+        {
+            conn.Close();
+            return Task.FromResult(Result.Fail<IEnumerable<Appointment>>(e.Message));
+        }
+    }
+
+
+	class Appt
+	{
+        public string Id { get; set; }
+        public long Start { get; set; }
+        public long End { get; set; }
+        public string Text { get; set; }
+        public bool IsAllDay { get; set; } = false;
+        public string Color { get; set; } = "Green";
     }
 }
 

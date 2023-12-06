@@ -10,6 +10,8 @@ namespace RadzenUI.Data
 
 		public Task<Result<User>> GetUser(string username);
 
+		public Task<Result> SetUsersLastCalendar(string userId, string calendarId);
+
 
 
 		public Task<Result<Calendar>> AddCalendar(string userId, string? name);
@@ -18,5 +20,6 @@ namespace RadzenUI.Data
 
 		public Task<Result<CalendarRole>> AddCalendarRole(string userId, string calenmdarId, string Role);
 
-	}
+		public Task<Result<IEnumerable<Appointment>>> GetAppointments(string calendarId, DateTime start, DateTime end);
+    }
 }

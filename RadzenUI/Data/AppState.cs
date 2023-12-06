@@ -9,20 +9,14 @@ public class AppState
 {
 	public static readonly string APPSTATE = "AppState";
 	public static readonly string APPUSER = "AppUser";
+	public static AppUser Anonymous { get; private set; } = new AppUser { Email = "", Id = "", Role = "", Username = "" };
     private readonly IDataProvider data;
 
-    public static AppUser Anonymous { get; private set; } = new AppUser { Email = "", Id = "", Role = "", Username = "" };
-	private AppUser _user = Anonymous;
-    private Calendar? _currentCalendar;
-
     public event EventHandler<AppUser>? UserChanged;
-    public event EventHandler<Calendar?>? CalendarChanged;
+    public event EventHandler<CalendarDTO?>? CalendarChanged;
 	
-
-	public ProtectedSessionStorage? Session { get; set; } = null;
-	public ObservableCollection<CalendarDTO> Calendars { get; set; } = new ObservableCollection<CalendarDTO>();
-
-
+	private AppUser _user = Anonymous;
+    private CalendarDTO? _currentCalendar;
 
     public AppUser User { 
 		get => _user; 
@@ -42,6 +36,19 @@ public class AppState
             _ = SaveToSession();	
 		}  
 	}
+    public CalendarDTO? CurrentCalendar { 
+		get => _currentCalendar;
+		set
+		{
+			_currentCalendar = value;
+			CalendarChanged?.Invoke(this, _currentCalendar);			
+		}
+	}
+
+	public ProtectedSessionStorage? Session { get; set; } = null;
+	public ObservableCollection<CalendarDTO> Calendars { get; set; } = new ObservableCollection<CalendarDTO>();
+
+
 
     public AppState(IDataProvider data)
     {
@@ -52,10 +59,16 @@ public class AppState
     {
         await LoadCalendars();
 
-
-		//  ToDo Set Current Calendar
+		// Set Current Calendar
 				
-		var x = Calendars.Any(c => c.CalendarId == User.LastCalendar);
+		if(Calendars.Any(c => c.CalendarId == User.LastCalendar))
+		{
+			CurrentCalendar = Calendars.Single(c => c.CalendarId == User.LastCalendar);
+		}
+		else
+		{
+            CurrentCalendar = null;
+		}
 
     }
 
@@ -73,16 +86,6 @@ public class AppState
         }
     }
 
-    public Calendar? CurrentCalendar { 
-		get => _currentCalendar;
-		set
-		{
-			_currentCalendar = value;
-			CalendarChanged?.Invoke(this, _currentCalendar);
-			
-			// Load Appointments
-		}
-	}
 
     public async Task LoadFromSession()
 	{
@@ -114,10 +117,7 @@ public class AppState
     
 }
 
-//	
-//  todo Get/clear user, calendar list, current calendar and and appointments when user changes
-//  todo load appointments when currentCalendar changes
-//  
+
 
 
 

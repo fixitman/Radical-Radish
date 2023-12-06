@@ -13,10 +13,8 @@ Welcome to your new app.
 
 <button class = "btn btn-light" @onclick="@Click">Click Me</button>
 
-<CalendarList UserId="e6b153cf-594d-4318-b1ad-759d38cfde73" />
-
-<RadzenButton Click="CreateCalendar">
-    Create a Calendar
+<RadzenButton Click="GetAppointments">
+    Get Appointments
 </RadzenButton>
 
 
@@ -42,5 +40,13 @@ Welcome to your new app.
             }
         }
     }
+
+    async Task GetAppointments()
+    {
+        var s = DateTime.Parse("12/10/2023");
+        var e = DateTime.Parse("12/11/2023");
+        var x = await data.GetAppointments("26ca95c0-21e3-4e50-bf92-72bb711c78a3", s, e);
+    }
+
 
 }
