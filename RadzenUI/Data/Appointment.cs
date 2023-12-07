@@ -8,4 +8,5 @@ public class Appointment
     public string Text { get; set; }
     public bool IsAllDay { get; set; } = false;
     public string Color { get; set; } = "Green";
+    public string CalendarId { get; set; }
 }

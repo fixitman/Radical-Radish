@@ -5,6 +5,8 @@
 @using Radzen
 
 @inject DialogService DialogService
+@inject IDataProvider db
+@inject AppState AppState
 
 
 
@@ -20,7 +22,8 @@
     SlotSelect=@OnSlotSelect 
     AppointmentSelect=@OnAppointmentSelect 
     SlotRender=@OnSlotRender 
-    AppointmentRender=@OnAppointmentRender >
+    AppointmentRender=@OnAppointmentRender 
+    LoadData=@OnLoadData>
     <RadzenDayView StartTime="@TimeSpan.FromHours(0)" />
     <RadzenWeekView />
     <RadzenMonthView />
@@ -34,16 +37,17 @@
 
     Dictionary<DateTime, string> events = new Dictionary<DateTime, string>();
 
-    IList<Appointment> appointments = new List<Appointment>
-    {
-        new Appointment { Start = DateTime.Parse("12/18/2023"),End = DateTime.Parse("12/19/2023"), Text = "Birthday" },
-        new Appointment { Start = DateTime.Today.AddDays(-11), End = DateTime.Today.AddDays(-10), Text = "Day off" , Color = "orange"},
-        new Appointment { Start = DateTime.Today.AddDays(-10), End = DateTime.Today.AddDays(-8), Text = "Work from home" },
-        new Appointment { Start = DateTime.Today.AddHours(10), End = DateTime.Today.AddHours(12), Text = "Online meeting" },
-        new Appointment { Start = DateTime.Today.AddHours(10), End = DateTime.Today.AddHours(13), Text = "Skype call" },
-        new Appointment { Start = DateTime.Today.AddHours(14), End = DateTime.Today.AddHours(14).AddMinutes(30), Text = "Dentist appointment" },
-        new Appointment { Start = DateTime.Today.AddDays(1), End = DateTime.Today.AddDays(12), Text = "Vacation" },
-    };
+    IList<Appointment> appointments = new List<Appointment>();
+    // new List<Appointment>
+    // {
+    //     new Appointment { Start = DateTime.Parse("12/18/2023"),End = DateTime.Parse("12/19/2023"), Text = "Birthday" },
+    //     new Appointment { Start = DateTime.Today.AddDays(-11), End = DateTime.Today.AddDays(-10), Text = "Day off" , Color = "orange"},
+    //     new Appointment { Start = DateTime.Today.AddDays(-10), End = DateTime.Today.AddDays(-8), Text = "Work from home" },
+    //     new Appointment { Start = DateTime.Today.AddHours(10), End = DateTime.Today.AddHours(12), Text = "Online meeting" },
+    //     new Appointment { Start = DateTime.Today.AddHours(10), End = DateTime.Today.AddHours(13), Text = "Skype call" },
+    //     new Appointment { Start = DateTime.Today.AddHours(14), End = DateTime.Today.AddHours(14).AddMinutes(30), Text = "Dentist appointment" },
+    //     new Appointment { Start = DateTime.Today.AddDays(1), End = DateTime.Today.AddDays(12), Text = "Vacation" },
+    // };
 
     void OnSlotRender(SchedulerSlotRenderEventArgs args)
     {
@@ -69,11 +73,16 @@
             Appointment data = await DialogService.OpenAsync<AddAppointmentPage>("Add Appointment",
                 new Dictionary<string, object> { { "Start", args.Start }, { "End", args.End } });
 
-            if (data != null)
+            if (data != null && AppState.CurrentCalendar != null)
             {
-                appointments.Add(data);
+                data.CalendarId = AppState.CurrentCalendar.CalendarId;
+                var result = await db.AddAppointment(data);
+                if (result.Success)
+                {
+                    appointments.Add(data);                    
+                    await scheduler.Reload();
+                }
                 // Either call the Reload method or reassign the Data property of the Scheduler
-                await scheduler.Reload();
             }
         }
     }
@@ -98,12 +107,20 @@
         }
 
         else if(data != null)
-        {
+        {            
             // Update the appointment
             args.Data.Start = data.Start;
             args.Data.End = data.End;
             args.Data.Text = data.Text;
             args.Data.Color = data.Color;
+
+            var result = await db.UpdateAppointment(args.Data);
+            if (result.IsFailure)
+            {
+                var box = await DialogService.Alert(result.Error, "Database Error");
+            }
+
+
         }
 
         await scheduler.Reload();
@@ -124,6 +141,20 @@
 
     async Task OnLoadData(SchedulerLoadDataEventArgs args)
     {
-        
+        var result = await db.GetAppointments(AppState.CurrentCalendar.CalendarId, args.Start, args.End);
+        if (result.Success)
+        {
+            appointments.Clear();
+            foreach( var a in result.Value)
+            {
+                appointments.Add(a);
+            }
+        }
+        else if(result.IsFailure)
+        {
+            bool? boxResult = await DialogService.Alert(result.Error, "Error");
+        }
     }
+
+    
 }

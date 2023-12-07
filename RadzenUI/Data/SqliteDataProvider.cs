@@ -2,6 +2,7 @@
 using Microsoft.Data.Sqlite;
 using System.Data;
 using System.Globalization;
+using System.Runtime.CompilerServices;
 
 namespace RadzenUI.Data;
 
@@ -165,10 +166,12 @@ where CalendarRoles.UserId = @UserId;";
         }
     }
 
+	// Appointments
+
     public Task<Result<IEnumerable<Appointment>>> GetAppointments(string calendarId, DateTime start, DateTime end)
 	{
-        var sql = @"SELECT * from Appointments where CalendarId = @CalId AND
-	(Start BETWEEN @Start AND @End or End BETWEEN @Start and @End)";
+        var sql = @"SELECT * from Appointments where (CalendarId = @CalId) AND
+	((Start BETWEEN @Start AND @End) or (End BETWEEN @Start AND @End))";
 
         using SqliteConnection conn = new SqliteConnection(connectionString);
         try
@@ -182,14 +185,8 @@ where CalendarRoles.UserId = @UserId;";
             }
 			else
 			{
-				var appointments = u.Select(a => new Appointment() {
-					Id = a.Id,
-					Start = new DateTime(a.Start),
-					End = new DateTime(a.End),
-					Color = a.Color,
-					IsAllDay = a.IsAllDay,
-					Text = a.Text
-				});
+				var appointments = u.Select(a => a.ToAppointment());
+				
 				return  Task.FromResult(Result.Ok<IEnumerable<Appointment>>(appointments));
 			}
         }
@@ -200,8 +197,68 @@ where CalendarRoles.UserId = @UserId;";
         }
     }
 
+    public Task<Result<Appointment>> AddAppointment(Appointment appointment)
+	{
+        using SqliteConnection conn = new SqliteConnection(connectionString);
+        try
+        {
+            var sql = @"INSERT INTO Appointments 
+					( Id, CalendarId, Text, Color, IsAllDay, Start, End) VALUES 
+					(  @Id, @CalendarId, @Text, @Color, @IsAllDay, @Start, @End) returning *";
 
-	class Appt
+			var appt = Appt.FromAppointment(appointment);
+			appt.Id = Guid.NewGuid().ToString();
+            
+			var r = conn.QuerySingleOrDefault<Appt>(sql, appt);
+            if (r == null)
+            {
+                conn.Close();
+                return Task.FromResult(Result.Fail<Appointment>("Error Creating Appointment"));
+            }
+			conn.Close ();
+            return Task.FromResult(Result.Ok<Appointment>( r.ToAppointment()));
+        }
+        catch (Exception e)
+        {
+            conn.Close();
+            return Task.FromResult(Result.Fail<Appointment>(e.Message));
+        }
+    }
+
+    public Task<Result<Appointment>> UpdateAppointment(Appointment appointment)
+	{
+        using SqliteConnection conn = new SqliteConnection(connectionString);
+        try
+        {
+            var sql = @"UPDATE Appointments set 
+				Start = @Start,
+				End = @End,
+				Text = @Text,
+				IsAllDay = @IsAllDay,
+				CalendarId = @CalendarId,
+				Color = @Color
+				where Id = @Id returning *";
+
+            var appt = Appt.FromAppointment(appointment);            
+
+            var r = conn.QuerySingleOrDefault<Appt>(sql, appt);
+            if (r == null)
+            {
+                conn.Close();
+                return Task.FromResult(Result.Fail<Appointment>("Error Updating Appointment"));
+            }
+            conn.Close();
+            return Task.FromResult(Result.Ok<Appointment>(r.ToAppointment()));
+        }
+        catch (Exception e)
+        {
+            conn.Close();
+            return Task.FromResult(Result.Fail<Appointment>(e.Message));
+        }
+    }
+
+
+    private class Appt
 	{
         public string Id { get; set; }
         public long Start { get; set; }
@@ -209,6 +266,40 @@ where CalendarRoles.UserId = @UserId;";
         public string Text { get; set; }
         public bool IsAllDay { get; set; } = false;
         public string Color { get; set; } = "Green";
+		public string CalendarId { get; set; }
+
+		public Appointment ToAppointment()
+		{
+			return new Appointment
+			{
+				Id = this.Id,
+				CalendarId = this.CalendarId,
+				Color = this.Color,
+				IsAllDay = this.IsAllDay,
+				Text = this.Text,
+				Start = new DateTime(this.Start),
+				End = new DateTime(this.End)
+			};
+		}
+
+		public static Appt FromAppointment(Appointment a)
+		{
+			return new Appt
+			{
+				Id = a.Id,
+				CalendarId = a.CalendarId,
+				Color = a.Color,
+				IsAllDay = a.IsAllDay,
+				Text = a.Text,
+				Start = a.Start.Ticks,
+				End = a.End.Ticks
+			};
+		}
+
+
+
+
+
     }
 }
 
