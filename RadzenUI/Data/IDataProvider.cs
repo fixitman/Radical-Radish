@@ -25,5 +25,6 @@ namespace RadzenUI.Data
 		public Task<Result<IEnumerable<Appointment>>> GetAppointments(string calendarId, DateTime start, DateTime end);
 		public Task<Result<Appointment>> AddAppointment(Appointment appointment);
 		public Task<Result<Appointment>> UpdateAppointment(Appointment appointment);
+		public Task<Result> DeleteAppointment(Appointment appointment);
     }
 }

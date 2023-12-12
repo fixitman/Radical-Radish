@@ -102,8 +102,15 @@
 
         if(data is string && data == "delete")
         {
-            appointments.Remove(args.Data);
-
+            var result = await db.DeleteAppointment(args.Data);
+            if (result.IsFailure)
+            {
+                var box = await DialogService.Alert(result.Error, "Database Error");
+            }
+            else
+            {
+                appointments.Remove(args.Data);                
+            }
         }
 
         else if(data != null)

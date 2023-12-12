@@ -117,7 +117,6 @@ public class SqliteDataProvider : IDataProvider
             return Task.FromResult(Result.Fail<Calendar>(e.Message));
         }
     }
-
 	public Task<Result<CalendarRole>> AddCalendarRole(string userId, string calenmdarId, string role)
 	{
 		using SqliteConnection conn = new SqliteConnection(connectionString);
@@ -138,7 +137,6 @@ public class SqliteDataProvider : IDataProvider
 			return Task.FromResult(Result.Fail<CalendarRole>(e.Message));
 		}
 	}
-
 	public Task<Result<IEnumerable<CalendarDTO>>> GetCalendars(string _userId)
 	{
 			var sql = 
@@ -166,8 +164,8 @@ where CalendarRoles.UserId = @UserId;";
         }
     }
 
-	// Appointments
 
+	// Appointments
     public Task<Result<IEnumerable<Appointment>>> GetAppointments(string calendarId, DateTime start, DateTime end)
 	{
         var sql = @"SELECT * from Appointments where (CalendarId = @CalId) AND
@@ -196,7 +194,6 @@ where CalendarRoles.UserId = @UserId;";
             return Task.FromResult(Result.Fail<IEnumerable<Appointment>>(e.Message));
         }
     }
-
     public Task<Result<Appointment>> AddAppointment(Appointment appointment)
 	{
         using SqliteConnection conn = new SqliteConnection(connectionString);
@@ -224,7 +221,6 @@ where CalendarRoles.UserId = @UserId;";
             return Task.FromResult(Result.Fail<Appointment>(e.Message));
         }
     }
-
     public Task<Result<Appointment>> UpdateAppointment(Appointment appointment)
 	{
         using SqliteConnection conn = new SqliteConnection(connectionString);
@@ -256,7 +252,28 @@ where CalendarRoles.UserId = @UserId;";
             return Task.FromResult(Result.Fail<Appointment>(e.Message));
         }
     }
+    public Task<Result> DeleteAppointment(Appointment appointment)
+	{
+        using SqliteConnection conn = new SqliteConnection(connectionString);
+        try
+        {
+            var sql = @"DELETE FROM Appointments WHERE Id = @Id;";
 
+			var r = conn.Execute(sql, new {Id = appointment.Id});
+            if (r < 1)
+            {
+                conn.Close();
+                return Task.FromResult(Result.Fail("Error Deleting Appointment"));
+            }
+            conn.Close();
+            return Task.FromResult(Result.Ok());
+        }
+        catch (Exception e)
+        {
+            conn.Close();
+            return Task.FromResult(Result.Fail(e.Message));
+        }
+    }
 
     private class Appt
 	{
