@@ -9,7 +9,7 @@
 @inject AppState AppState
 @inject AuthenticationStateProvider AuthStateProvider
 @inject ProtectedSessionStorage Session
-
+@implements IDisposable
 
 <h3 class="text-center">Please Sign In</h3>
 
@@ -66,7 +66,7 @@
 		}
 
 		AppState.User = new AppUser { Id = r.Value.Id, Email = r.Value.Email, Username = r.Value.Username, Role = r.Value.AppRole, LastCalendar = r.Value.LastCalendar };
-				
+
 		var authState = await ((CustomAuthStateProvider)AuthStateProvider).ChangeUser(r.Value.Id, r.Value.Username, r.Value.AppRole);
 
 		NavMgr.NavigateTo(ReturnUrl ?? "/");
@@ -79,5 +79,10 @@
 		{
 			NavMgr.NavigateTo(ReturnUrl ?? "/");			
 		}
+	}
+
+	public void Dispose()
+	{
+		AuthStateProvider.AuthenticationStateChanged -= OnAuthStateChange;
 	}
 }

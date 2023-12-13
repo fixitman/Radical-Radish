@@ -1,11 +1,7 @@
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Components.Authorization;
 using Radzen;
 using RadzenUI.auth;
 using RadzenUI.Data;
-using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
-using System.Security.Claims;
 
 namespace RadzenUI;
 
@@ -19,7 +15,6 @@ public class Program
         builder.Services.AddRazorPages();
         builder.Services.AddServerSideBlazor();
         
-        builder.Services.AddSingleton<WeatherForecastService>();
         builder.Services.AddScoped<IDataProvider, SqliteDataProvider>();
         builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
         builder.Services.AddScoped<AppState>();
@@ -43,53 +38,51 @@ public class Program
 
         app.MapBlazorHub();
 
-        AuthEndpoints.MapEndpoints(app);
+        // AuthEndpoints.MapEndpoints(app);
                 
         app.MapFallbackToPage("/_Host");
 
         app.Run();
-    }
-
-   
+    }   
 
 }
 
-public class AuthEndpoints
-{
-    public static void MapEndpoints(WebApplication app)
-    {
-        app.MapPost("/Auth/Login", (LoginViewModel model) =>
-        {
-            if(model == null) return Results.BadRequest();
+//public class AuthEndpoints
+//{
+//    public static void MapEndpoints(WebApplication app)
+//    {
+//        app.MapPost("/Auth/Login", (LoginViewModel model) =>
+//        {
+//            if(model == null) return Results.BadRequest();
 
-            if(string.IsNullOrEmpty(model.Username) || string.IsNullOrEmpty(model.Password)) return Results.BadRequest();   
+//            if(string.IsNullOrEmpty(model.Username) || string.IsNullOrEmpty(model.Password)) return Results.BadRequest();   
 
-            if(model.Username.Equals("Mike") && model.Password.Equals("Penny"))
-            {
-                return Results.SignIn( new ClaimsPrincipal(
-                    new ClaimsIdentity(
-                        new List<Claim>()
-                        {
+//            if(model.Username.Equals("Mike") && model.Password.Equals("Penny"))
+//            {
+//                return Results.SignIn( new ClaimsPrincipal(
+//                    new ClaimsIdentity(
+//                        new List<Claim>()
+//                        {
 
-                        },"Cookies"
-                    )
-                ), new AuthenticationProperties() { RedirectUri="/"});                
-            };
+//                        },"Cookies"
+//                    )
+//                ), new AuthenticationProperties() { RedirectUri="/"});                
+//            };
 
-            return Results.Unauthorized();
-        });
+//            return Results.Unauthorized();
+//        });
                
-    }
-}
+//    }
+//}
 
-internal class LoginViewModel
-{
-    [Required]
-    public string Username { get; set; }
+//internal class LoginViewModel
+//{
+//    [Required]
+//    public string Username { get; set; }
 
-    [Required]
-    [PasswordPropertyText]
-    public string Password { get; set; }
+//    [Required]
+//    [PasswordPropertyText]
+//    public string Password { get; set; }
 
-    public bool IsValid { get => !string.IsNullOrEmpty(Username) && !string.IsNullOrEmpty(Password); }
-}
+//    public bool IsValid { get => !string.IsNullOrEmpty(Username) && !string.IsNullOrEmpty(Password); }
+//}
