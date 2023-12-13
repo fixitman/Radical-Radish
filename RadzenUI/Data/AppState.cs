@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
+﻿using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using RadzenUI.Pages.Auth.Models;
 using System.Collections.ObjectModel;
 
@@ -41,7 +40,10 @@ public class AppState
 		set
 		{
 			_currentCalendar = value;
+			data.SetUsersLastCalendar(User.Id!, value?.CalendarId ?? "");
+			User.LastCalendar = value?.CalendarId ?? "";
 			CalendarChanged?.Invoke(this, _currentCalendar);			
+			_ = SaveToSession();
 		}
 	}
 
@@ -55,6 +57,11 @@ public class AppState
         this.data = data;
     }
 
+	public void Initialize(ProtectedSessionStorage session)
+	{
+		Session = session;		
+	}
+	    
     private async Task GetUserData()
     {
         await LoadCalendars();
@@ -63,13 +70,20 @@ public class AppState
 				
 		if(Calendars.Any(c => c.CalendarId == User.LastCalendar))
 		{
-			CurrentCalendar = Calendars.Single(c => c.CalendarId == User.LastCalendar);
+			CurrentCalendar = Calendars.OrderBy(c => c.OwnerName)
+				.OrderBy(c => c.CalendarName)
+				.First(c => c.CalendarId == User.LastCalendar);
+		}
+		else if(Calendars.Any(c => c.OwnerId == User.Id)) 
+		{
+			CurrentCalendar = Calendars.OrderBy(c => c.OwnerName).First(c => c.OwnerId == User.Id);
 		}
 		else
 		{
-            CurrentCalendar = null;
+             CurrentCalendar = null;			
 		}
 
+        //todo finish this
     }
 
     public async Task LoadCalendars()
@@ -85,7 +99,6 @@ public class AppState
             }
         }
     }
-
 
     public async Task LoadFromSession()
 	{
@@ -108,13 +121,6 @@ public class AppState
         
     }
 
-	public async Task InitializeAsync(ProtectedSessionStorage session)
-	{
-		Session = session;
-		
-	}
-
-    
 }
 
 

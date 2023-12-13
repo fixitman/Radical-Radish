@@ -1,0 +1,27 @@
+﻿@inject AppState AppState
+@implements IDisposable
+
+
+<h3>@Title</h3>
+
+@code {
+
+	string Title = "";
+
+	protected override void OnInitialized()
+	{
+		Title = AppState.CurrentCalendar?.CalendarName ?? "";
+		AppState.CalendarChanged += OnCalendarChanged;
+	}
+
+	void OnCalendarChanged(object? sender, CalendarDTO? calendar)
+	{
+		Title = calendar?.CalendarName ?? "";
+		StateHasChanged();
+	}
+
+	public void Dispose()
+	{
+		AppState.CalendarChanged -= OnCalendarChanged;
+	}
+}

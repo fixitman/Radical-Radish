@@ -5,19 +5,21 @@
 @implements IDisposable
 
 
-<h4>CalendarList</h4>
-
-
+<nav class="flex-column">
 	@foreach (CalendarDTO c in AppState.Calendars){
-		<p>@($"{c.CalendarName} - ({c.OwnerName})") </p>
+		<div class="nav-item px-3" onclick="@(()=>ChangeCalendar(c))">
+			<NavLink class="nav-link" >
+				<span class="oi oi-plus" aria-hidden="true"></span> @($"{c.CalendarName} ({c.OwnerName})")
+			</NavLink>
+		</div>		
 	}
+</nav>
+
 
 
 @code {
-	[Parameter]
-	public string UserId { get; set; } = string.Empty;	
 
-	protected override async Task OnInitializedAsync()
+	protected override void OnInitialized()
 	{
 
 		AppState.Calendars.CollectionChanged += OnCollectionChanged;
@@ -35,6 +37,11 @@
 
 		// }
 		return;
+	}
+
+	public void ChangeCalendar(CalendarDTO cal)
+	{
+		AppState.CurrentCalendar = cal;
 	}
 
 	public void OnCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)

@@ -31,7 +31,7 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        await AppState.InitializeAsync(Session);
+        AppState.Initialize(Session);
        
         await base.OnAfterRenderAsync(firstRender);
     }

@@ -1,8 +1,10 @@
-﻿@page "/schedule"
+﻿@page "/"
 @attribute [Authorize]
 @using RadzenUI
 @using RadzenUI.Shared
 @using Radzen
+
+@implements IDisposable
 
 @inject DialogService DialogService
 @inject IDataProvider db
@@ -35,19 +37,18 @@
 @code {
     RadzenScheduler<Appointment> scheduler;
 
-    Dictionary<DateTime, string> events = new Dictionary<DateTime, string>();
+    IList<Appointment> appointments = new List<Appointment>();    
 
-    IList<Appointment> appointments = new List<Appointment>();
-    // new List<Appointment>
-    // {
-    //     new Appointment { Start = DateTime.Parse("12/18/2023"),End = DateTime.Parse("12/19/2023"), Text = "Birthday" },
-    //     new Appointment { Start = DateTime.Today.AddDays(-11), End = DateTime.Today.AddDays(-10), Text = "Day off" , Color = "orange"},
-    //     new Appointment { Start = DateTime.Today.AddDays(-10), End = DateTime.Today.AddDays(-8), Text = "Work from home" },
-    //     new Appointment { Start = DateTime.Today.AddHours(10), End = DateTime.Today.AddHours(12), Text = "Online meeting" },
-    //     new Appointment { Start = DateTime.Today.AddHours(10), End = DateTime.Today.AddHours(13), Text = "Skype call" },
-    //     new Appointment { Start = DateTime.Today.AddHours(14), End = DateTime.Today.AddHours(14).AddMinutes(30), Text = "Dentist appointment" },
-    //     new Appointment { Start = DateTime.Today.AddDays(1), End = DateTime.Today.AddDays(12), Text = "Vacation" },
-    // };
+    protected override void OnInitialized()
+    {
+        AppState.CalendarChanged += OnCalendarChanged;
+        return;
+    }
+
+    void OnCalendarChanged(object? sender, CalendarDTO? c)
+    {
+        scheduler.Reload();
+    }
 
     void OnSlotRender(SchedulerSlotRenderEventArgs args)
     {
@@ -163,5 +164,8 @@
         }
     }
 
-    
+    public void Dispose()
+    {
+        AppState.CalendarChanged -= OnCalendarChanged;
+    }
 }
