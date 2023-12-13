@@ -124,6 +124,9 @@ public class AppState
 }
 
 
+// todo On logout make sure to clear session data. test by refreshing
+
+
 
 
 

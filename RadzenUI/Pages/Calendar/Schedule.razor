@@ -149,19 +149,24 @@
 
     async Task OnLoadData(SchedulerLoadDataEventArgs args)
     {
-        var result = await db.GetAppointments(AppState.CurrentCalendar.CalendarId, args.Start, args.End);
-        if (result.Success)
+        appointments.Clear();
+        if(AppState.CurrentCalendar == null)
         {
-            appointments.Clear();
-            foreach( var a in result.Value)
-            {
-                appointments.Add(a);
-            }
+            return;
         }
-        else if(result.IsFailure)
+
+        var result = await db.GetAppointments(AppState.CurrentCalendar.CalendarId, args.Start, args.End);
+        if (result.IsFailure)
         {
             bool? boxResult = await DialogService.Alert(result.Error, "Error");
+            return;
         }
+
+        foreach( var a in result.Value)
+        {
+            appointments.Add(a);
+        }
+        
     }
 
     public void Dispose()
