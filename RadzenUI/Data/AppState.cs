@@ -4,7 +4,7 @@ using System.Collections.ObjectModel;
 
 namespace RadzenUI.Data;
 
-public class AppState
+public class AppState : IDisposable
 {
 	public static readonly string APPSTATE = "AppState";
 	public static readonly string APPUSER = "AppUser";
@@ -22,17 +22,8 @@ public class AppState
 		set
 		{
 			_user = value;
-			if(User.Id == "")
-			{
-				CurrentCalendar = null;
-				Calendars.Clear();
-			}
-			else
-			{
-				_ = GetUserData();
-			}
+			
 			UserChanged?.Invoke(this, _user);
-            _ = SaveToSession();	
 		}  
 	}
     public CalendarDTO? CurrentCalendar { 
@@ -55,6 +46,7 @@ public class AppState
     public AppState(IDataProvider data)
     {
         this.data = data;
+		UserChanged += OnUserChanged;
     }
 
 	public void Initialize(ProtectedSessionStorage session)
@@ -121,10 +113,38 @@ public class AppState
         
     }
 
+	public async Task DeleteSessionData()
+	{
+		if(Session != null)
+		{
+			await Session.DeleteAsync(APPUSER);
+		}
+	}
+
+	public void OnUserChanged(object? sender, AppUser user)
+	{
+        if (user.Id == "")
+        {
+            CurrentCalendar = null;
+            Calendars.Clear();			
+			_ = DeleteSessionData();			
+        }
+        else
+        {
+			_= GetUserData();
+			_= SaveToSession();
+        }
+    }
+
+	public void Dispose()
+	{
+        UserChanged -= OnUserChanged;
+    }
+
 }
 
 
-// todo On logout make sure to clear session data. test by refreshing
+
 
 
 
